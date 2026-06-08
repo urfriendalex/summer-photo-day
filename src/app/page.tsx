@@ -5,9 +5,9 @@ import { siteContent } from "@/lib/site-content";
 export default function Home() {
   const marqueeImages = getImagesFromPublicFolder("media/marquee");
   const topicImages = {
-    picnic: getImagesFromPublicFolder("media/picnic"),
+    style: getImagesFromPublicFolder("media/mood"),
     photo: getImagesFromPublicFolder("media/photo"),
-    mood: getImagesFromPublicFolder("media/mood"),
+    picnic: getImagesFromPublicFolder("media/picnic"),
   };
 
   return (

@@ -7,6 +7,7 @@ import { Flip } from "gsap/Flip";
 import type { CSSProperties } from "react";
 import type { MouseEvent } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { revealAfterLines } from "@/lib/reveal-hierarchy";
 import {
@@ -33,6 +34,7 @@ type SectionGridImagesProps = {
 
 export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const lightboxRef = useRef<HTMLDivElement | null>(null);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const switchTransitionRect = useRef<DOMRect | null>(null);
   const pinnedRef = useRef(false);
@@ -46,6 +48,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
   const [pinnedSlotSize, setPinnedSlotSize] = useState<{ width: number; height: number } | null>(
     null,
   );
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const imageListKey = images.join("\0");
   const columnOptions: GridColumnCount[] = isMobile ? [1, 2] : [2, 3, 4];
 
@@ -113,7 +116,62 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     pinnedRef.current = false;
     setIsPinned(false);
     setPinnedSlotSize(null);
+    setActiveImageIndex(null);
   }, [imageListKey]);
+
+  useEffect(() => {
+    if (activeImageIndex === null) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setActiveImageIndex(null);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeImageIndex]);
+
+  useLayoutEffect(() => {
+    if (activeImageIndex === null) {
+      return;
+    }
+
+    const lightbox = lightboxRef.current;
+    if (!lightbox) {
+      return;
+    }
+
+    const syncLightboxInsets = () => {
+      const header = document.querySelector(".experience__header");
+      const cta = document.querySelector(".experience__register-cta");
+      const topInset = header?.getBoundingClientRect().bottom ?? 0;
+      const bottomInset = cta
+        ? Math.max(0, window.innerHeight - cta.getBoundingClientRect().top)
+        : 0;
+
+      lightbox.style.setProperty("--lightbox-pad-top", `${topInset}px`);
+      lightbox.style.setProperty("--lightbox-pad-bottom", `${bottomInset}px`);
+    };
+
+    syncLightboxInsets();
+    window.addEventListener("resize", syncLightboxInsets);
+
+    return () => {
+      window.removeEventListener("resize", syncLightboxInsets);
+      lightbox.style.removeProperty("--lightbox-pad-top");
+      lightbox.style.removeProperty("--lightbox-pad-bottom");
+    };
+  }, [activeImageIndex]);
 
   useEffect(() => {
     if (isMobile) {
@@ -336,6 +394,20 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     changeColumns(nextColumns);
   };
 
+  const openImage = (index: number) => {
+    setActiveImageIndex(index);
+  };
+
+  const closeImage = () => {
+    setActiveImageIndex(null);
+  };
+
+  const handleLightboxBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      closeImage();
+    }
+  };
+
   const pinnedSlotStyle: CSSProperties | undefined =
     isPinned && !isMobile && pinnedSlotSize
       ? {
@@ -388,10 +460,60 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
       >
         {images.map((image, index) => (
           <figure key={`${image}-${index}`} className="topic-detail__card">
-            <img src={image} alt="" />
+            <button
+              type="button"
+              className="topic-detail__card-button"
+              onClick={() => openImage(index)}
+              aria-label="Увеличить фото"
+            >
+              <img src={image} alt="" />
+            </button>
           </figure>
         ))}
       </div>
+
+      {activeImageIndex !== null && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              ref={lightboxRef}
+              className="topic-detail__lightbox"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Увеличенное фото"
+              onClick={handleLightboxBackdropClick}
+            >
+              <button
+                type="button"
+                className="topic-detail__lightbox-close interactive interactive--inverse"
+                onClick={closeImage}
+                aria-label="Закрыть"
+              >
+                <svg
+                  className="topic-detail__lightbox-close-icon"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 1l12 12M13 1L1 13"
+                    stroke="currentColor"
+                    strokeWidth="1.25"
+                    strokeLinecap="square"
+                  />
+                </svg>
+              </button>
+              <div className="topic-detail__lightbox-stage">
+                <img
+                  className="topic-detail__lightbox-image"
+                  src={images[activeImageIndex]}
+                  alt=""
+                />
+              </div>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

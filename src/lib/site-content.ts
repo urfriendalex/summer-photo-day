@@ -1,4 +1,4 @@
-export type TopicKey = "picnic" | "photo" | "mood";
+export type TopicKey = "style" | "photo" | "picnic";
 
 export type TopicContent = {
   key: TopicKey;
@@ -55,10 +55,10 @@ export const siteContent: SiteContent = {
       "An outdoor summer photo day in a Warsaw park with film-inspired portraits, slow picnic details, soft styling, and an optional picnic experience.",
   },
   projectTitle: "summer photo day",
-  overlineLabel: "park edition",
-  location: "WARSAW PARK",
-  date: "DATE TBA",
-  priceLabel: "PRICE TBA",
+  overlineLabel: "PICNIC EXPIRIENCE",
+  location: "WARSAW",
+  date: "28.06.2026",
+  priceLabel: "111 PLN",
   registerLabel: "ЗАРЕГИСТРИРОВАТЬСЯ",
   introText: [
     "Летний фотодень на природе в одном из парков Варшавы. Точная дата, локация и название проекта скоро появятся здесь.",
@@ -96,14 +96,14 @@ export const siteContent: SiteContent = {
   },
   topics: [
     {
-      key: "picnic",
-      label: "PICNIC",
+      key: "style",
+      label: "STYLE",
       person: "@liza_karasiova",
       personUrl: "https://www.instagram.com/liza_karasiova/",
       description: [
-        "Picnic experience станет отдельным уровнем фотодня: не просто декор для кадра, а маленький летний ритуал в парке.",
-        "Пледы, корзина, сезонные фрукты, цветы, легкая сервировка и детали будут собраны так, чтобы красиво жить в кадре и не ощущаться постановочно.",
-        "Этот формат подойдет тем, кто хочет больше времени, больше воздуха и историю, в которой после портретов остается место для спокойного момента.",
+        "Picnic mood — это часть дня, когда можно не спешить: после съемки вы остаетесь в парке, садитесь на плед и проводите время вместе с девчонками.",
+        "Мы соберем уютное место — пледы, корзину, легкие snacks, цветы и детали — чтобы можно было расслабиться, болтать, смеяться и жить этот летний момент, а не только позировать для кадра.",
+        "Это формат для тех, кто хочет не только красивые портреты, но и настоящий girls-day: общий ритм, воздух, солнце между деревьями и ощущение, что день продолжается еще немного после камеры.",
         "Финальные опции picnic-пакета появятся после утверждения локации и даты.",
       ],
       ctaLabel: "view moodboard",
@@ -124,10 +124,10 @@ export const siteContent: SiteContent = {
       ctaUrl: "https://www.instagram.com/lina_tsapova/",
     },
     {
-      key: "mood",
-      label: "MOOD",
-      person: "summer team",
-      personUrl: "https://www.instagram.com/lina_tsapova/",
+      key: "picnic",
+      label: "PICNIC",
+      person: "WARSAW PARK PICNIC EXPERIENCE",
+      personUrl: "https://www.instagram.com/liza_karasiova/",
       description: [
         "Настроение проекта пока собирается вокруг слов: парк, лето, пикник, мягкий свет, натуральные фактуры, легкая романтика без студийной торжественности.",
         "Образы будут проще и свободнее: льняные ткани, светлые слои, акценты цвета, корзины, цветы, книги, фрукты и детали, которые можно держать в руках.",

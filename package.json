@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "build": "node scripts/sync-favicons.mjs && next build",
     "favicons:sync": "node scripts/sync-favicons.mjs",
     "start": "next start",

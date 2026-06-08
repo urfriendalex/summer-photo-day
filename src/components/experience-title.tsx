@@ -433,11 +433,13 @@ function ExperienceTitleComponent({
         onKeyDown={handleKeyDown}
         aria-label={label}
       >
-        <span className="experience__title-reveal-clip">
-          <span className="experience__title-reveal-track">{label}</span>
-        </span>
-        <span className="experience__title-overline" aria-hidden="true">
-          {overlineLabel}
+        <span className="experience__title-stack">
+          <span className="experience__title-reveal-clip">
+            <span className="experience__title-reveal-track">{label}</span>
+          </span>
+          <span className="experience__title-overline" aria-hidden="true">
+            {overlineLabel}
+          </span>
         </span>
       </div>
     </div>
