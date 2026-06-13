@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element, react-hooks/set-state-in-effect */
 
 import {
+  type CSSProperties,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -1230,7 +1231,14 @@ export function SummerPhotoDayExperience({
                 )}
               />
             ) : null}
-            <div className="experience__register-cta-button-wrap">
+            <div
+              className="experience__register-cta-button-wrap"
+              style={
+                {
+                  "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
+                } as CSSProperties
+              }
+            >
               <button
                 className={`sticky-register__button landing-panel__register-button interactive${
                   activeMode === "signup" ? "" : " interactive--accent"

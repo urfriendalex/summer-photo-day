@@ -517,7 +517,9 @@ main.experience--preloader-reveal ~ .landing-info-panel {
 }
 
 .experience__nav-item.is-active {
-  color: var(--color-accent);
+  color: var(--color-ink);
+  background: var(--color-pastel-yellow);
+  padding-inline: 0.3rem;
 }
 
 .experience__meta {
@@ -940,6 +942,8 @@ button.experience__meta--cta:focus-visible {
 
 .topic-detail__link {
   position: relative;
+  z-index: 0;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -947,12 +951,23 @@ button.experience__meta--cta:focus-visible {
   width: fit-content;
   padding-bottom: 0.14rem;
   color: var(--color-ink);
-  background: var(--color-pastel-yellow-soft);
+  background: transparent;
   padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-decoration: none;
+}
+
+.topic-detail__link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-pastel-yellow-soft);
+  opacity: 0;
+  animation: filled-control-bg-in 280ms var(--ease-out-strong) forwards;
+  animation-delay: 520ms;
 }
 
 .topic-detail__link::after {
@@ -1281,6 +1296,7 @@ button.experience__meta--cta:focus-visible {
 
 /* Frost pill wraps only the button — same chip as `.landing-info-panel` (+ icon) */
 .experience__register-cta-button-wrap {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1289,14 +1305,31 @@ button.experience__meta--cta:focus-visible {
   padding: 0 clamp(0.75rem, 2.1vw, 1.125rem);
   border: var(--landing-frost-chip-border);
   border-radius: var(--radius-base);
+  background: transparent;
+  -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
+  backdrop-filter: blur(var(--landing-info-frost-blur));
+  transform: translateZ(0);
+}
+
+.experience__register-cta-button-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background: color-mix(
     in srgb,
     var(--color-pastel-yellow) 88%,
     transparent
   );
-  -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
-  backdrop-filter: blur(var(--landing-info-frost-blur));
-  transform: translateZ(0);
+  opacity: 0;
+  animation: filled-control-bg-in 280ms var(--ease-out-strong) forwards;
+  animation-delay: var(--filled-bg-delay, 0s);
+}
+
+@keyframes filled-control-bg-in {
+  to {
+    opacity: 1;
+  }
 }
 
 .sticky-register__spots-hint {
@@ -1855,47 +1888,6 @@ button.experience__meta--cta:focus-visible {
     padding-top: 0.35rem;
   }
 
-  .landing-info-panel.is-open {
-    inset: 0;
-    z-index: 10320;
-    width: 100vw;
-    height: 100svh;
-    min-height: 0;
-    padding:
-      max(1.25rem, env(safe-area-inset-top))
-      1rem
-      calc(
-        var(--landing-info-panel-toggle-reserve) +
-          max(1rem, env(safe-area-inset-bottom))
-      );
-    border: 0;
-    background: color-mix(
-      in srgb,
-      var(--color-bg) 90%,
-      var(--color-pastel-yellow) 10%
-    );
-    transform-origin: bottom right;
-    box-shadow: none;
-  }
-
-  .landing-info-panel.is-open .landing-info-panel__toggle {
-    right: max(
-      var(--landing-info-toggle-offset-x),
-      env(safe-area-inset-right)
-    );
-    bottom: max(
-      var(--landing-info-toggle-offset-y),
-      env(safe-area-inset-bottom)
-    );
-  }
-
-  .landing-info-panel.is-open .landing-info-panel__body {
-    justify-content: flex-start;
-    gap: 1.5rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
   .experience--landing {
     height: 100svh;
     min-height: 100svh;
@@ -1930,7 +1922,13 @@ button.experience__meta--cta:focus-visible {
   }
 
   .experience__title {
-    line-height: 0.82;
+    line-height: 0.76;
+  }
+
+  .experience__title-overline {
+    bottom: -0.42em;
+    font-size: clamp(0.56rem, 2.7vw, 0.72rem);
+    line-height: 1;
   }
 
   .experience__nav-row {
