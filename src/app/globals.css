@@ -305,7 +305,7 @@ input {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(2.8rem, 14vw, 9.5rem);
   font-weight: 800;
-  line-height: 0.82;
+  line-height: 0.78;
   letter-spacing: 0em;
   text-transform: uppercase;
   text-align: left;
@@ -406,7 +406,8 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   text-transform: uppercase;
   padding-block: 0.14em;
   padding-inline: 0.5em;
-  color: var(--color-accent);
+  color: var(--color-ink);
+  background: var(--color-pastel-yellow);
   pointer-events: none;
   white-space: nowrap;
 }
@@ -677,30 +678,35 @@ button.experience__meta--cta:focus-visible {
 }
 
 .picnic-feature {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 4;
+  z-index: 10300;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
   gap: clamp(1.25rem, 3vw, 3.5rem);
   padding: clamp(1rem, 2.5vw, 2.5rem);
-  background: var(--color-butter);
+  background: color-mix(
+    in srgb,
+    var(--color-bg) 88%,
+    var(--color-pastel-yellow) 12%
+  );
   -webkit-backdrop-filter: blur(28px) saturate(0.82);
   backdrop-filter: blur(28px) saturate(0.82);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(1rem);
+  transform: scale(0.04);
+  transform-origin: left bottom;
   pointer-events: none;
   transition:
     opacity var(--duration-panel-enter) var(--ease-out-strong),
-    transform var(--duration-panel-enter) var(--ease-out-strong),
+    transform 360ms var(--ease-drawer),
     visibility 0s linear var(--duration-panel-enter);
 }
 
-.landing-panel--picnic .picnic-feature {
+.picnic-feature.is-open {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: scale(1);
   pointer-events: auto;
   transition-delay: 0s;
 }
@@ -734,7 +740,9 @@ button.experience__meta--cta:focus-visible {
 
 .picnic-feature__eyebrow {
   margin-bottom: 0.85rem;
-  color: var(--color-accent);
+  color: var(--color-ink);
+  background: var(--color-pastel-yellow);
+  padding: 0.3rem 0.45rem;
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -781,12 +789,16 @@ button.experience__meta--cta:focus-visible {
   position: fixed;
   left: max(0.875rem, env(safe-area-inset-left));
   bottom: var(--landing-floating-bottom);
-  z-index: 10060;
+  z-index: 10310;
   min-height: var(--landing-frost-chip-height);
   padding: 0 1rem;
   border: var(--landing-frost-chip-border);
   border-radius: var(--radius-base);
-  background: color-mix(in srgb, var(--color-surface) 68%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--color-pastel-yellow) 72%,
+    transparent
+  );
   color: var(--color-ink);
   font-size: 0.7rem;
   font-weight: 800;
@@ -802,7 +814,7 @@ button.experience__meta--cta:focus-visible {
 }
 
 .picnic-feature-toggle.is-open {
-  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  background: var(--color-pastel-yellow);
   color: var(--color-ink);
 }
 
@@ -934,7 +946,9 @@ button.experience__meta--cta:focus-visible {
   justify-self: end;
   width: fit-content;
   padding-bottom: 0.14rem;
-  color: var(--color-accent);
+  color: var(--color-ink);
+  background: var(--color-pastel-yellow-soft);
+  padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1277,7 +1291,7 @@ button.experience__meta--cta:focus-visible {
   border-radius: var(--radius-base);
   background: color-mix(
     in srgb,
-    var(--color-pastel-yellow) 76%,
+    var(--color-pastel-yellow) 88%,
     transparent
   );
   -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
@@ -1679,7 +1693,7 @@ button.experience__meta--cta:focus-visible {
   position: fixed;
   right: var(--landing-info-panel-h-edge);
   bottom: var(--landing-floating-bottom);
-  z-index: 10050;
+  z-index: 10300;
   width: var(--landing-frost-chip-height);
   height: var(--landing-frost-chip-height);
   padding: 0;
@@ -1708,6 +1722,7 @@ button.experience__meta--cta:focus-visible {
   padding: var(--landing-info-panel-pad) var(--landing-info-panel-pad)
     var(--landing-info-panel-toggle-reserve);
   box-shadow: 0 18px 40px rgba(17, 17, 17, 0.08);
+  z-index: 10320;
 }
 
 .landing-info-panel__toggle {
@@ -1835,6 +1850,47 @@ button.experience__meta--cta:focus-visible {
 }
 
 @media (max-width: 720px) {
+  .landing-info-panel.is-open {
+    inset: 0;
+    z-index: 10320;
+    width: 100vw;
+    height: 100svh;
+    min-height: 0;
+    padding:
+      max(1.25rem, env(safe-area-inset-top))
+      1rem
+      calc(
+        var(--landing-info-panel-toggle-reserve) +
+          max(1rem, env(safe-area-inset-bottom))
+      );
+    border: 0;
+    background: color-mix(
+      in srgb,
+      var(--color-bg) 90%,
+      var(--color-pastel-yellow) 10%
+    );
+    transform-origin: bottom right;
+    box-shadow: none;
+  }
+
+  .landing-info-panel.is-open .landing-info-panel__toggle {
+    right: max(
+      var(--landing-info-toggle-offset-x),
+      env(safe-area-inset-right)
+    );
+    bottom: max(
+      var(--landing-info-toggle-offset-y),
+      env(safe-area-inset-bottom)
+    );
+  }
+
+  .landing-info-panel.is-open .landing-info-panel__body {
+    justify-content: flex-start;
+    gap: 1.5rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .experience--landing {
     height: 100svh;
     min-height: 100svh;
@@ -1869,7 +1925,7 @@ button.experience__meta--cta:focus-visible {
   }
 
   .experience__title {
-    line-height: 1.08;
+    line-height: 0.82;
   }
 
   .experience__nav-row {
@@ -1910,9 +1966,6 @@ button.experience__meta--cta:focus-visible {
   }
 
   .picnic-feature {
-    position: fixed;
-    inset: 0;
-    z-index: 10200;
     grid-template-columns: 1fr;
     grid-template-rows: minmax(13rem, 42svh) auto;
     gap: 0.85rem;
@@ -1924,7 +1977,7 @@ button.experience__meta--cta:focus-visible {
     background: color-mix(
       in srgb,
       var(--color-bg) 88%,
-      transparent
+      var(--color-pastel-yellow) 12%
     );
     -webkit-backdrop-filter: blur(30px) saturate(0.82);
     backdrop-filter: blur(30px) saturate(0.82);
@@ -1960,15 +2013,16 @@ button.experience__meta--cta:focus-visible {
     padding: 0;
     place-items: center;
     color: var(--color-ink);
+    font-size: 1.25rem;
   }
 
   .picnic-feature-toggle.is-open {
-    top: max(0.875rem, env(safe-area-inset-top));
-    right: max(0.875rem, env(safe-area-inset-right));
-    bottom: auto;
-    left: auto;
-    z-index: 10210;
-    background: var(--landing-info-frost-bg);
+    top: auto;
+    right: auto;
+    bottom: var(--landing-floating-bottom);
+    left: max(0.875rem, env(safe-area-inset-left));
+    z-index: 10330;
+    background: var(--color-pastel-yellow);
   }
 
   .picnic-feature-toggle__label {
@@ -1980,38 +2034,9 @@ button.experience__meta--cta:focus-visible {
     white-space: nowrap;
   }
 
-  .picnic-feature-toggle__icon,
-  .picnic-feature-toggle__icon::before,
-  .picnic-feature-toggle__icon::after {
+  .picnic-feature-toggle__icon {
     display: block;
-  }
-
-  .picnic-feature-toggle__icon::before,
-  .picnic-feature-toggle__icon::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    background: currentColor;
-    transform: translate(-50%, -50%);
-  }
-
-  .picnic-feature-toggle__icon::before {
-    width: 21px;
-    height: 1px;
-  }
-
-  .picnic-feature-toggle__icon::after {
-    width: 1px;
-    height: 20px;
-    transition:
-      opacity var(--duration-interaction) var(--ease-out-strong),
-      transform var(--duration-interaction) var(--ease-out-strong);
-  }
-
-  .picnic-feature-toggle.is-open .picnic-feature-toggle__icon::after {
-    opacity: 0;
-    transform: translate(-50%, -50%) scaleY(0.35);
+    line-height: 1;
   }
 
   .marquee__track {

@@ -325,6 +325,7 @@ export function SummerPhotoDayExperience({
   }, [applyMode]);
 
   const toggleLandingInfo = useCallback(() => {
+    setIsPicnicFeatureOpen(false);
     setIsLandingInfoOpen((current) => !current);
   }, []);
 
@@ -1166,9 +1167,7 @@ export function SummerPhotoDayExperience({
                 />
               </article>
             ) : (
-              <div
-                className={`landing-panel${isPicnicFeatureOpen ? " landing-panel--picnic" : ""}`}
-              >
+              <div className="landing-panel">
                 <div
                   ref={marqueeViewportRef}
                   className="marquee"
@@ -1212,33 +1211,6 @@ export function SummerPhotoDayExperience({
                     )}
                   </div>
                 </div>
-                <article
-                  className="picnic-feature"
-                  aria-hidden={!isPicnicFeatureOpen}
-                  aria-label="Picnic experience details"
-                >
-                  <div className="picnic-feature__image">
-                    {picnicImages[0] ? (
-                      <img src={picnicImages[0]} alt="" />
-                    ) : null}
-                  </div>
-                  <div className="picnic-feature__content">
-                    <p className="picnic-feature__eyebrow">
-                      {content.picnicFeature.eyebrow}
-                    </p>
-                    <h2>{content.picnicFeature.title}</h2>
-                    <div className="picnic-feature__description">
-                      {content.picnicFeature.description.map((paragraph) => (
-                        <p key={paragraph}>{paragraph}</p>
-                      ))}
-                    </div>
-                    <ul className="picnic-feature__includes">
-                      {content.picnicFeature.includes.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
               </div>
             )}
           </section>
@@ -1301,6 +1273,34 @@ export function SummerPhotoDayExperience({
       </main>
 
       {onLanding ? (
+        <article
+          className={`picnic-feature${isPicnicFeatureOpen ? " is-open" : ""}`}
+          aria-hidden={!isPicnicFeatureOpen}
+          aria-label="Picnic experience details"
+        >
+          <div className="picnic-feature__image">
+            {picnicImages[0] ? <img src={picnicImages[0]} alt="" /> : null}
+          </div>
+          <div className="picnic-feature__content">
+            <p className="picnic-feature__eyebrow">
+              {content.picnicFeature.eyebrow}
+            </p>
+            <h2>{content.picnicFeature.title}</h2>
+            <div className="picnic-feature__description">
+              {content.picnicFeature.description.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            <ul className="picnic-feature__includes">
+              {content.picnicFeature.includes.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ) : null}
+
+      {onLanding ? (
         <button
           className={`picnic-feature-toggle interactive${isPicnicFeatureOpen ? " is-open" : ""}`}
           type="button"
@@ -1318,7 +1318,9 @@ export function SummerPhotoDayExperience({
           <span
             className="picnic-feature-toggle__icon"
             aria-hidden="true"
-          />
+          >
+            {isPicnicFeatureOpen ? "−" : "🧺"}
+          </span>
         </button>
       ) : null}
 
