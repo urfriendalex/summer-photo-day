@@ -147,15 +147,17 @@ export const siteContent: SiteContent = {
     {
       key: "makeup",
       label: "MAKEUP",
-      person: "MAKEUP INSPIRATION",
-      personUrl: "https://www.instagram.com/liza_karasiova/",
+      person: "@mateynastya",
+      personUrl:
+        "https://www.instagram.com/mateynastya?igsh=Zzk5bWU5Z3BkMWF4",
       description: [
-        "Для каждой участницы мы подготовим makeup inspiration, которая поддержит образ и останется комфортной для летней съемки на природе.",
+        "Визажист Настя подготовит макияж, который поддержит образ и останется комфортным для летней съемки на природе.",
         "В фокусе — свежая кожа, мягкое сияние, теплые натуральные оттенки и аккуратный цветовой акцент, если он подходит вашему образу.",
-        "Вы получите понятные референсы заранее, чтобы повторить макияж самостоятельно или показать их своему визажисту.",
+        "Makeup inspiration будет адаптирована к вашему образу, чтобы все детали WILD GRACE работали как единая визуальная история.",
       ],
-      ctaLabel: "view makeup moodboard",
-      ctaUrl: "https://www.instagram.com/liza_karasiova/",
+      ctaLabel: "view makeup artist",
+      ctaUrl:
+        "https://www.instagram.com/mateynastya?igsh=Zzk5bWU5Z3BkMWF4",
     },
   ],
 };

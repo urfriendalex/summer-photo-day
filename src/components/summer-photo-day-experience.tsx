@@ -475,6 +475,21 @@ export function SummerPhotoDayExperience({
   }, [activeMode, isLandingInfoOpen]);
 
   useEffect(() => {
+    if (!isPicnicFeatureOpen || activeMode !== "landing") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsPicnicFeatureOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [activeMode, isPicnicFeatureOpen]);
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
@@ -1200,6 +1215,7 @@ export function SummerPhotoDayExperience({
                 <article
                   className="picnic-feature"
                   aria-hidden={!isPicnicFeatureOpen}
+                  aria-label="Picnic experience details"
                 >
                   <div className="picnic-feature__image">
                     {picnicImages[0] ? (
@@ -1294,9 +1310,15 @@ export function SummerPhotoDayExperience({
             setIsPicnicFeatureOpen((current) => !current);
           }}
         >
-          {isPicnicFeatureOpen
-            ? content.picnicFeature.closeLabel
-            : content.picnicFeature.openLabel}
+          <span className="picnic-feature-toggle__label">
+            {isPicnicFeatureOpen
+              ? content.picnicFeature.closeLabel
+              : content.picnicFeature.openLabel}
+          </span>
+          <span
+            className="picnic-feature-toggle__icon"
+            aria-hidden="true"
+          />
         </button>
       ) : null}
 

@@ -1,11 +1,12 @@
 :root {
   /* Wild Grace — ecru layers with deep espresso type */
-  --color-accent: #8f806b;
+  --color-accent: #6f624f;
   --color-bg: #eee7d8;
   --color-surface: #f6f1e7;
   --color-ink: #211a14;
   --color-ink-soft: rgba(33, 26, 20, 0.68);
-  --color-baby-yellow: #8f806b;
+  --color-baby-yellow: #dfcf62;
+  --color-pastel-yellow: #dfcf62;
   --color-butter: rgba(246, 241, 231, 0.72);
   --color-peach: #ded4c2;
 
@@ -15,7 +16,7 @@
   --ease-interaction: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-interaction: 160ms;
   --color-interactive-ink-hover: #756754;
-  --color-interactive-accent-hover: #5f5242;
+  --color-interactive-accent-hover: #211a14;
   --color-interactive-inverse-bg-hover: #756754;
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
