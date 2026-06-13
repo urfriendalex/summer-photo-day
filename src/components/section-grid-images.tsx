@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
 import type { CSSProperties } from "react";
 import type { MouseEvent } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { revealAfterLines } from "@/lib/reveal-hierarchy";
@@ -35,6 +35,8 @@ type SectionGridImagesProps = {
 export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
   const lightboxRef = useRef<HTMLDivElement | null>(null);
+  const lightboxImageRef = useRef<HTMLImageElement | null>(null);
+  const isClosingLightboxRef = useRef(false);
   const switchRef = useRef<HTMLDivElement | null>(null);
   const switchTransitionRect = useRef<DOMRect | null>(null);
   const pinnedRef = useRef(false);
@@ -51,6 +53,38 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const imageListKey = images.join("\0");
   const columnOptions: GridColumnCount[] = isMobile ? [1, 2] : [2, 3, 4];
+
+  const closeImage = useCallback(() => {
+    const lightbox = lightboxRef.current;
+    const image = lightboxImageRef.current;
+
+    if (!lightbox || isClosingLightboxRef.current) {
+      setActiveImageIndex(null);
+      return;
+    }
+
+    isClosingLightboxRef.current = true;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) {
+      setActiveImageIndex(null);
+      return;
+    }
+
+    gsap.killTweensOf([lightbox, image]);
+    gsap.to(image, {
+      opacity: 0,
+      scale: 0.96,
+      duration: 0.24,
+      ease: "power2.in",
+    });
+    gsap.to(lightbox, {
+      opacity: 0,
+      duration: 0.28,
+      ease: "power2.in",
+      onComplete: () => setActiveImageIndex(null),
+    });
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 720px)");
@@ -124,20 +158,66 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
       return;
     }
 
-    const previousOverflow = document.body.style.overflow;
+    const scrollY = window.scrollY;
+    const root = document.documentElement;
+    const previousRootOverflow = root.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyPosition = document.body.style.position;
+    const previousBodyTop = document.body.style.top;
+    const previousBodyWidth = document.body.style.width;
+
+    root.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setActiveImageIndex(null);
+        closeImage();
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      root.style.overflow = previousRootOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.position = previousBodyPosition;
+      document.body.style.top = previousBodyTop;
+      document.body.style.width = previousBodyWidth;
+      window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeImageIndex, closeImage]);
+
+  useLayoutEffect(() => {
+    if (activeImageIndex === null) {
+      isClosingLightboxRef.current = false;
+      return;
+    }
+
+    const lightbox = lightboxRef.current;
+    const image = lightboxImageRef.current;
+    if (!lightbox || !image) {
+      return;
+    }
+
+    isClosingLightboxRef.current = false;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      return;
+    }
+
+    gsap.fromTo(lightbox, { opacity: 0 }, { opacity: 1, duration: 0.32, ease: "power2.out" });
+    gsap.fromTo(
+      image,
+      { opacity: 0, scale: 0.96 },
+      { opacity: 1, scale: 1, duration: 0.42, ease: "power3.out" },
+    );
+
+    return () => {
+      gsap.killTweensOf([lightbox, image]);
     };
   }, [activeImageIndex]);
 
@@ -398,10 +478,6 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     setActiveImageIndex(index);
   };
 
-  const closeImage = () => {
-    setActiveImageIndex(null);
-  };
-
   const handleLightboxBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
       closeImage();
@@ -505,6 +581,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
               </button>
               <div className="topic-detail__lightbox-stage">
                 <img
+                  ref={lightboxImageRef}
                   className="topic-detail__lightbox-image"
                   src={images[activeImageIndex]}
                   alt=""

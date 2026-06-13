@@ -1284,6 +1284,8 @@ button.experience__meta--cta:focus-visible {
   background: rgba(0, 0, 0, 0.72);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  overscroll-behavior: none;
+  touch-action: none;
   cursor: zoom-out;
 }
 
