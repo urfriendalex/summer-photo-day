@@ -1,8 +1,11 @@
 "use client";
 
 import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
 import { flushSync } from "react-dom";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
+
+gsap.registerPlugin(Flip);
 
 const TITLE_INTRO_FROM = {
   opacity: 0,
@@ -38,10 +41,10 @@ function animateBlurIntro(
         {
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.55,
+          duration: 0.5,
           ease: "power2.out",
         },
-        0.12,
+        0.72,
       );
   });
 }
@@ -50,9 +53,9 @@ type ExperienceTitleProps = {
   label: string;
   overlineLabel: string;
   onClick: () => void;
-  /** When true, blur the title and subtitle into their final header position. */
+  /** When true, reveal at center, then move into the final header position. */
   preloader?: boolean;
-  /** Fired once the blur reveal finishes. */
+  /** Fired once the move into the header finishes. */
   onPreloaderComplete?: () => void;
 };
 
@@ -85,6 +88,32 @@ function fitTitleFontSize(
     titleRoot.style.fontSize = `${px}px`;
   }
   return px;
+}
+
+function waitForWindowLoad(): Promise<void> {
+  if (typeof document === "undefined" || document.readyState === "complete") {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    window.addEventListener("load", () => resolve(), { once: true });
+  });
+}
+
+function getBleedFrame(bleed: HTMLElement) {
+  const rect = bleed.getBoundingClientRect();
+  const layoutWidth =
+    typeof document !== "undefined"
+      ? document.documentElement.clientWidth
+      : rect.width;
+  const viewportWidth =
+    typeof window !== "undefined"
+      ? (window.visualViewport?.width ?? layoutWidth)
+      : rect.width;
+
+  return {
+    left: Math.max(0, rect.left),
+    width: Math.min(rect.width, layoutWidth, viewportWidth),
+  };
 }
 
 function getTitleFitWidth(bleed: HTMLElement, paddingX: number): number {
@@ -255,6 +284,8 @@ function ExperienceTitleComponent({
           return;
         }
 
+        bleed.classList.add("experience__title-bleed--preloader-slot");
+
         if (reduceMotion) {
           gsap.set(track, {
             opacity: 1,
@@ -272,7 +303,19 @@ function ExperienceTitleComponent({
         flushSync(() => {
           setIntroSurface(true);
         });
-        gsap.set(titleRoot, { opacity: 1 });
+
+        const bleedFrame = getBleedFrame(bleed);
+        gsap.set(titleRoot, {
+          position: "fixed",
+          left: bleedFrame.left,
+          top: "50%",
+          yPercent: -50,
+          width: bleedFrame.width,
+          textAlign: "left",
+          boxSizing: "border-box",
+          zIndex: 10050,
+          opacity: 1,
+        });
 
         if (!reduceMotion) {
           await animateBlurIntro(track, overline);
@@ -283,11 +326,43 @@ function ExperienceTitleComponent({
           return;
         }
 
-        introFinishedRef.current = true;
+        await waitForWindowLoad();
+        if (cancelled) {
+          return;
+        }
+
+        const bleedFrameBeforeFlip = getBleedFrame(bleed);
+        gsap.set(titleRoot, {
+          left: bleedFrameBeforeFlip.left,
+          width: bleedFrameBeforeFlip.width,
+        });
+
+        const state = Flip.getState(titleRoot);
+
+        bleed.classList.remove("experience__title-bleed--preloader-slot");
+        gsap.set(titleRoot, {
+          clearProps:
+            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+        });
         gsap.set(titleRoot, { opacity: 1 });
-        gsap.set(track, { clearProps: "opacity,filter" });
-        gsap.set(overline, { clearProps: "opacity,filter" });
-        onPreloaderComplete?.();
+
+        Flip.from(state, {
+          duration: reduceMotion ? 0.05 : 0.75,
+          ease: "power3.inOut",
+          absolute: true,
+          simple: true,
+          onComplete: () => {
+            introFinishedRef.current = true;
+            gsap.set(titleRoot, {
+              clearProps:
+                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
+            });
+            gsap.set(titleRoot, { opacity: 1 });
+            gsap.set(track, { clearProps: "opacity,filter" });
+            gsap.set(overline, { clearProps: "opacity,filter" });
+            onPreloaderComplete?.();
+          },
+        });
       };
 
       void runIntro();
