@@ -483,8 +483,6 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem);
   padding-bottom: 0.35rem;
   background: color-mix(in srgb, var(--color-bg) 72%, transparent);
-  -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
-  backdrop-filter: blur(var(--landing-info-frost-blur));
 }
 
 .experience__nav {
