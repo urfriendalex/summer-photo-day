@@ -33,14 +33,14 @@ export async function sendBookingEmail(payload: BookingPayload) {
   const resend = new Resend(resendApiKey);
 
   const from =
-    process.env.BOOKING_EMAIL_FROM?.trim() || "Summer Photo Day <bookings@lizakarasiova.com>";
+    process.env.BOOKING_EMAIL_FROM?.trim() || "Wild Grace <bookings@lizakarasiova.com>";
 
   const result = await resend.emails.send({
     from,
     to: [bookingEmailTo],
-    subject: `Новая заявка BLOOMING DIVA: ${payload.name}`,
+    subject: `Новая заявка WILD GRACE: ${payload.name}`,
     text: [
-      "Новая заявка на BLOOMING DIVA PHOTO DAY",
+      "Новая заявка на WILD GRACE PHOTO DAY | PICNIC EXPERIENCE",
       "",
       `Имя: ${payload.name}`,
       `Email: ${payload.email}`,
@@ -62,7 +62,7 @@ export async function sendBookingTelegram(payload: BookingPayload) {
   const chatId = getRequiredEnv("TELEGRAM_CHAT_ID");
 
   const text = [
-    "Новая заявка на BLOOMING DIVA PHOTO DAY",
+    "Новая заявка на WILD GRACE PHOTO DAY | PICNIC EXPERIENCE",
     `Имя: ${payload.name}`,
     `Email: ${payload.email}`,
     `Instagram: ${payload.instagram}`,

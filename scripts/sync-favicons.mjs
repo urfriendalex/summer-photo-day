@@ -6,7 +6,7 @@ import pngToIco from "png-to-ico";
 import sharp from "sharp";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const sourcePath = join(root, "scripts/assets/cherry-blossom-apple.png");
+const sourcePath = join(root, "scripts/assets/herb-emoji.png");
 const publicDir = join(root, "public");
 
 const source = readFileSync(sourcePath);
@@ -34,4 +34,4 @@ const favicon32 = join(publicDir, "favicon-32x32.png");
 const ico = await pngToIco([favicon16, favicon32]);
 writeFileSync(join(publicDir, "favicon.ico"), ico);
 
-console.log("sync-favicons: wrote transparent favicon fallbacks");
+console.log("sync-favicons: wrote herb emoji favicon set");

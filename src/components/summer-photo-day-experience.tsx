@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element, react-hooks/set-state-in-effect */
 
 import {
+  type CSSProperties,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -58,6 +59,7 @@ type ExperienceProps = {
   content: SiteContent;
   marqueeImages: string[];
   topicImages: Record<TopicKey, string[]>;
+  picnicImages: string[];
 };
 
 type ExperienceMode = "landing" | "signup" | TopicKey;
@@ -75,10 +77,12 @@ export function SummerPhotoDayExperience({
   content,
   marqueeImages,
   topicImages,
+  picnicImages,
 }: ExperienceProps) {
   const [activeMode, setActiveMode] = useState<ExperienceMode>("landing");
   const [activeTopic, setActiveTopic] = useState<TopicKey | null>(null);
   const [isLandingInfoOpen, setIsLandingInfoOpen] = useState(false);
+  const [isPicnicFeatureOpen, setIsPicnicFeatureOpen] = useState(false);
   const landingInfoPanelRef = useRef<HTMLDivElement | null>(null);
   const marqueeViewportRef = useRef<HTMLDivElement | null>(null);
   const marqueeGroupRef = useRef<HTMLDivElement | null>(null);
@@ -322,10 +326,7 @@ export function SummerPhotoDayExperience({
   }, [applyMode]);
 
   const toggleLandingInfo = useCallback(() => {
-    if (!window.matchMedia("(max-width: 720px)").matches) {
-      return;
-    }
-
+    setIsPicnicFeatureOpen(false);
     setIsLandingInfoOpen((current) => !current);
   }, []);
 
@@ -420,6 +421,7 @@ export function SummerPhotoDayExperience({
     }
 
     setIsLandingInfoOpen(false);
+    setIsPicnicFeatureOpen(false);
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -440,18 +442,16 @@ export function SummerPhotoDayExperience({
     };
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!mobileLandingInfoMq.matches) {
-        setIsLandingInfoOpen(false);
-        return;
-      }
-
       const panel = landingInfoPanelRef.current;
       if (!panel || panel.contains(event.target as Node)) {
         return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
+      if (mobileLandingInfoMq.matches) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
       setIsLandingInfoOpen(false);
     };
 
@@ -475,6 +475,21 @@ export function SummerPhotoDayExperience({
       mobileLandingInfoMq.removeEventListener("change", handleMediaChange);
     };
   }, [activeMode, isLandingInfoOpen]);
+
+  useEffect(() => {
+    if (!isPicnicFeatureOpen || activeMode !== "landing") {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsPicnicFeatureOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [activeMode, isPicnicFeatureOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1216,7 +1231,14 @@ export function SummerPhotoDayExperience({
                 )}
               />
             ) : null}
-            <div className="experience__register-cta-button-wrap">
+            <div
+              className="experience__register-cta-button-wrap"
+              style={
+                {
+                  "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
+                } as CSSProperties
+              }
+            >
               <button
                 className={`sticky-register__button landing-panel__register-button interactive${
                   activeMode === "signup" ? "" : " interactive--accent"
@@ -1259,29 +1281,65 @@ export function SummerPhotoDayExperience({
       </main>
 
       {onLanding ? (
+        <article
+          className={`picnic-feature${isPicnicFeatureOpen ? " is-open" : ""}`}
+          aria-hidden={!isPicnicFeatureOpen}
+          aria-label="Picnic experience details"
+        >
+          <div className="picnic-feature__image">
+            {picnicImages[0] ? <img src={picnicImages[0]} alt="" /> : null}
+          </div>
+          <div className="picnic-feature__content">
+            <p className="picnic-feature__eyebrow">
+              {content.picnicFeature.eyebrow}
+            </p>
+            <h2>{content.picnicFeature.title}</h2>
+            <div className="picnic-feature__description">
+              {content.picnicFeature.description.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+            <ul className="picnic-feature__includes">
+              {content.picnicFeature.includes.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </article>
+      ) : null}
+
+      {onLanding ? (
+        <button
+          className={`picnic-feature-toggle interactive${isPicnicFeatureOpen ? " is-open" : ""}`}
+          type="button"
+          aria-pressed={isPicnicFeatureOpen}
+          onClick={() => {
+            setIsLandingInfoOpen(false);
+            setIsPicnicFeatureOpen((current) => !current);
+          }}
+        >
+          <span className="picnic-feature-toggle__label">
+            {isPicnicFeatureOpen
+              ? content.picnicFeature.closeLabel
+              : content.picnicFeature.openLabel}
+          </span>
+          <span
+            className="picnic-feature-toggle__icon"
+            aria-hidden="true"
+          >
+            {isPicnicFeatureOpen ? "−" : "🧺"}
+          </span>
+        </button>
+      ) : null}
+
+      {onLanding ? (
         <div
           id="landing-info-panel"
           ref={landingInfoPanelRef}
           className={`landing-info-panel${isLandingInfoOpen ? " is-open" : ""}`}
           role="region"
-          aria-label="Summer Photo Day details"
+          aria-label="Wild Grace details"
         >
-          <button
-            className="landing-info-panel__toggle interactive"
-            type="button"
-            aria-label={
-              isLandingInfoOpen ? "Hide footer details" : "Show footer details"
-            }
-            aria-controls="landing-info-panel-body"
-            aria-expanded={isLandingInfoOpen}
-            onClick={toggleLandingInfo}
-          >
-            <span
-              className="landing-info-panel__toggle-icon"
-              aria-hidden="true"
-            />
-          </button>
-
           <div
             id="landing-info-panel-body"
             className="landing-info-panel__body"
@@ -1333,6 +1391,25 @@ export function SummerPhotoDayExperience({
               })}
             </div>
           </div>
+
+          <button
+            className="landing-info-panel__toggle interactive"
+            type="button"
+            aria-label={
+              isLandingInfoOpen ? "Hide footer details" : "Show footer details"
+            }
+            aria-controls="landing-info-panel-body"
+            aria-expanded={isLandingInfoOpen}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={toggleLandingInfo}
+          >
+            <span
+              className="landing-info-panel__toggle-icon"
+              aria-hidden="true"
+            />
+          </button>
         </div>
       ) : null}
       {headerMetaCursorPos
