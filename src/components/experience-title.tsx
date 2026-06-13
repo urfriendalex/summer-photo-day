@@ -1,82 +1,58 @@
 "use client";
 
 import { gsap } from "gsap";
-import { Flip } from "gsap/Flip";
 import { flushSync } from "react-dom";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
 
-gsap.registerPlugin(Flip);
-
 const TITLE_INTRO_FROM = {
   opacity: 0,
-  scaleX: 0.72,
-  scaleY: 1.16,
-  filter: "blur(5px)",
-  transformOrigin: "50% 50%",
-  force3D: true,
+  filter: "blur(12px)",
 } as const;
 
 const OVERLINE_INTRO_FROM = {
   opacity: 0,
-  scaleX: 1.25,
-  filter: "blur(2px)",
-  force3D: true,
+  filter: "blur(8px)",
 } as const;
 
-const INTRO_BEAT_GAP = 0.03;
-
-/** Stagger opacity/blur ahead of depth so the reveal eases in rather than popping. */
-function animateTitleIntro(track: HTMLElement): Promise<void> {
-  return new Promise((resolve) => {
-    gsap
-      .timeline({
-        defaults: { force3D: true, transformOrigin: "50% 50%" },
-        onComplete: resolve,
-      })
-      .to(track, { opacity: 1, duration: 0.16, ease: "none" }, 0)
-      .to(
-        track,
-        { filter: "blur(0px)", duration: 0.34, ease: "power1.out" },
-        0,
-      )
-      .to(
-        track,
-        { scaleX: 1, scaleY: 1, duration: 0.58, ease: "power4.out" },
-        0,
-      );
-  });
-}
-
-function animateOverlineIntro(overline: HTMLElement): Promise<void> {
-  return new Promise((resolve) => {
-    gsap
-      .timeline({ defaults: { force3D: true }, onComplete: resolve })
-      .to(overline, { opacity: 1, duration: 0.14, ease: "none" }, 0)
-      .to(overline, { scaleX: 1, duration: 0.28, ease: "power3.out" }, 0)
-      .to(
-        overline,
-        { filter: "blur(0px)", duration: 0.24, ease: "power1.out" },
-        0,
-      );
-  });
-}
-
-async function animateIntroSequence(
+function animateBlurIntro(
   track: HTMLElement,
   overline: HTMLElement,
 ): Promise<void> {
-  await animateTitleIntro(track);
-  await gsap.to({}, { duration: INTRO_BEAT_GAP });
-  await animateOverlineIntro(overline);
+  return new Promise((resolve) => {
+    gsap
+      .timeline({
+        onComplete: resolve,
+      })
+      .to(
+        track,
+        {
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.7,
+          ease: "power2.out",
+        },
+        0,
+      )
+      .to(
+        overline,
+        {
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.55,
+          ease: "power2.out",
+        },
+        0.12,
+      );
+  });
 }
 
 type ExperienceTitleProps = {
   label: string;
   overlineLabel: string;
   onClick: () => void;
-  /** When true, run the intro: centered reveal, then Flip to header after window load. */
+  /** When true, blur the title and subtitle into their final header position. */
   preloader?: boolean;
-  /** Fired once the Flip-to-header animation finishes. */
+  /** Fired once the blur reveal finishes. */
   onPreloaderComplete?: () => void;
 };
 
@@ -109,33 +85,6 @@ function fitTitleFontSize(
     titleRoot.style.fontSize = `${px}px`;
   }
   return px;
-}
-
-function waitForWindowLoad(): Promise<void> {
-  if (typeof document === "undefined" || document.readyState === "complete") {
-    return Promise.resolve();
-  }
-  return new Promise((resolve) => {
-    window.addEventListener("load", () => resolve(), { once: true });
-  });
-}
-
-/** Match header bleed geometry so intro doesn’t re-center text (avoids a left jump on Flip). */
-function getBleedFrame(bleed: HTMLElement) {
-  const rect = bleed.getBoundingClientRect();
-  const layoutWidth =
-    typeof document !== "undefined"
-      ? document.documentElement.clientWidth
-      : rect.width;
-  const viewportWidth =
-    typeof window !== "undefined"
-      ? (window.visualViewport?.width ?? layoutWidth)
-      : rect.width;
-
-  return {
-    left: Math.max(0, rect.left),
-    width: Math.min(rect.width, layoutWidth, viewportWidth),
-  };
 }
 
 function getTitleFitWidth(bleed: HTMLElement, paddingX: number): number {
@@ -247,20 +196,14 @@ function ExperienceTitleComponent({
       const overline = titleRoot?.querySelector<HTMLElement>(
         ".experience__title-overline",
       );
-      const clip = titleRoot?.querySelector<HTMLElement>(
-        ".experience__title-reveal-clip",
-      );
       if (titleRoot) {
         gsap.killTweensOf(titleRoot);
         gsap.set(titleRoot, { clearProps: "opacity,visibility" });
       }
-      if (clip) {
-        gsap.set(clip, { clearProps: "perspective" });
-      }
       if (track) {
         gsap.killTweensOf(track);
         gsap.set(track, {
-          clearProps: "opacity,transform,filter,transformOrigin",
+          clearProps: "opacity,filter",
         });
       }
       if (overline) {
@@ -283,10 +226,7 @@ function ExperienceTitleComponent({
     const overline = titleRoot?.querySelector<HTMLElement>(
       ".experience__title-overline",
     );
-    const clip = titleRoot?.querySelector<HTMLElement>(
-      ".experience__title-reveal-clip",
-    );
-    if (!bleed || !titleRoot || !track || !overline || !clip) {
+    if (!bleed || !titleRoot || !track || !overline) {
       return;
     }
 
@@ -315,24 +255,16 @@ function ExperienceTitleComponent({
           return;
         }
 
-        bleed.classList.add("experience__title-bleed--preloader-slot");
-
-        /* Park-day reveal: lift the masthead in like a sunlit page. */
         if (reduceMotion) {
-          gsap.set(clip, { clearProps: "perspective" });
           gsap.set(track, {
             opacity: 1,
-            scaleX: 1,
-            scaleY: 1,
             filter: "blur(0px)",
           });
           gsap.set(overline, {
             opacity: 1,
-            scaleX: 1,
             filter: "blur(0px)",
           });
         } else {
-          gsap.set(clip, { perspective: 1100 });
           gsap.set(track, TITLE_INTRO_FROM);
           gsap.set(overline, OVERLINE_INTRO_FROM);
         }
@@ -340,72 +272,22 @@ function ExperienceTitleComponent({
         flushSync(() => {
           setIntroSurface(true);
         });
-
-        const bleedFrame = getBleedFrame(bleed);
-        gsap.set(titleRoot, {
-          position: "fixed",
-          left: bleedFrame.left,
-          top: "50%",
-          yPercent: -50,
-          width: bleedFrame.width,
-          textAlign: "left",
-          boxSizing: "border-box",
-          zIndex: 10050,
-          opacity: 1,
-        });
-
-        if (cancelled) {
-          return;
-        }
-
-        if (!reduceMotion) {
-          await animateIntroSequence(track, overline);
-          gsap.set(track, { clearProps: "transform,filter,transformOrigin" });
-          gsap.set(overline, { clearProps: "filter" });
-          gsap.set(clip, { clearProps: "perspective" });
-        }
-        if (cancelled) {
-          return;
-        }
-
-        await waitForWindowLoad();
-        if (cancelled) {
-          return;
-        }
-
-        const bleedFrameBeforeFlip = getBleedFrame(bleed);
-        gsap.set(titleRoot, {
-          left: bleedFrameBeforeFlip.left,
-          width: bleedFrameBeforeFlip.width,
-        });
-
-        /** Record fixed intro layout, then snap to natural header in the DOM; Flip animates into place. */
-        const state = Flip.getState(titleRoot);
-
-        bleed.classList.remove("experience__title-bleed--preloader-slot");
-        gsap.set(titleRoot, {
-          clearProps:
-            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
-        });
         gsap.set(titleRoot, { opacity: 1 });
 
-        Flip.from(state, {
-          duration: reduceMotion ? 0.05 : 0.75,
-          ease: "power3.inOut",
-          absolute: true,
-          simple: true,
-          onComplete: () => {
-            introFinishedRef.current = true;
-            gsap.set(titleRoot, {
-              clearProps:
-                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
-            });
-            gsap.set(titleRoot, { opacity: 1 });
-            gsap.set(track, { clearProps: "opacity,transform,filter" });
-            gsap.set(overline, { clearProps: "opacity,filter" });
-            onPreloaderComplete?.();
-          },
-        });
+        if (!reduceMotion) {
+          await animateBlurIntro(track, overline);
+          gsap.set(track, { clearProps: "filter" });
+          gsap.set(overline, { clearProps: "filter" });
+        }
+        if (cancelled) {
+          return;
+        }
+
+        introFinishedRef.current = true;
+        gsap.set(titleRoot, { opacity: 1 });
+        gsap.set(track, { clearProps: "opacity,filter" });
+        gsap.set(overline, { clearProps: "opacity,filter" });
+        onPreloaderComplete?.();
       };
 
       void runIntro();
