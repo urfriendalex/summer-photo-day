@@ -1306,7 +1306,7 @@ export function SummerPhotoDayExperience({
           ref={landingInfoPanelRef}
           className={`landing-info-panel${isLandingInfoOpen ? " is-open" : ""}`}
           role="region"
-          aria-label="Garden Elegance details"
+          aria-label="Wild Grace details"
         >
           <div
             id="landing-info-panel-body"

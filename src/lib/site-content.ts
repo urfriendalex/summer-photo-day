@@ -58,18 +58,18 @@ export type SiteContent = {
 
 export const siteContent: SiteContent = {
   seo: {
-    title: "GARDEN ELEGANCE",
+    title: "WILD GRACE",
     description:
-      "Garden Elegance is a summer photo day and picnic experience in a Warsaw park with soft styling, makeup inspiration, and warm editorial portraits.",
+      "Wild Grace is a summer photo day and picnic experience in a Warsaw park with soft styling, makeup inspiration, and warm editorial portraits.",
   },
-  projectTitle: "Garden Elegance",
+  projectTitle: "WILD GRACE",
   overlineLabel: "PHOTO DAY / PICNIC EXPERIENCE",
   location: "WARSAW",
   date: "28.06.2026",
   priceLabel: "1250 PLN",
   registerLabel: "ЗАРЕГИСТРИРОВАТЬСЯ",
   introText: [
-    "Garden Elegance — камерный фотодень в одном из парков Варшавы, соединенный с полноценным picnic experience.",
+    "WILD GRACE — камерный фотодень в одном из парков Варшавы, соединенный с полноценным picnic experience.",
     "Вас ждут персонально собранный образ, вдохновение для макияжа и съемка в мягком дневном свете с Линой Цаповой.",
     "После съемки день продолжается за красиво сервированным пикником: пледы, цветы, сезонные детали, легкие угощения и время, чтобы просто побыть в летнем моменте.",
     "Это не только съемка, а цельный girls-day experience с готовыми визуальными решениями и теплой, неспешной атмосферой.",
@@ -124,7 +124,7 @@ export const siteContent: SiteContent = {
       person: "@liza_karasiova",
       personUrl: "https://www.instagram.com/liza_karasiova/",
       description: [
-        "Лиза Карасёва соберет образ в эстетике Garden Elegance: мягкие силуэты, натуральные ткани, светлые оттенки и один выразительный летний акцент.",
+        "Лиза Карасёва соберет образ в эстетике WILD GRACE: мягкие силуэты, натуральные ткани, светлые оттенки и один выразительный летний акцент.",
         "До фотодня вы получите персональные рекомендации по одежде, аксессуарам и сочетаниям, чтобы образ гармонично работал и в портретах, и в пикник-сцене.",
         "Главная идея — выглядеть собранно, но естественно: романтичная легкость без лишней торжественности.",
       ],
@@ -139,7 +139,7 @@ export const siteContent: SiteContent = {
       description: [
         "Лина Цапова снимет персональную серию в естественном свете: портреты среди зелени, детали образа, движение и живые моменты пикника.",
         "Во время съемки Лина мягко направляет и помогает с позированием, сохраняя ощущение легкости и настоящего летнего дня.",
-        "Визуальный язык Garden Elegance — теплые оттенки, деликатный контраст и кадры с настроением пленочного дневника.",
+        "Визуальный язык WILD GRACE — теплые оттенки, деликатный контраст и кадры с настроением пленочного дневника.",
       ],
       ctaLabel: "view photographer",
       ctaUrl: "https://www.instagram.com/lina_tsapova/",
