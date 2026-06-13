@@ -681,7 +681,7 @@ button.experience__meta--cta:focus-visible {
 .picnic-feature {
   position: fixed;
   inset: 0;
-  z-index: 10300;
+  z-index: 10320;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
   gap: clamp(1.25rem, 3vw, 3.5rem);
@@ -712,10 +712,76 @@ button.experience__meta--cta:focus-visible {
   transition-delay: 0s;
 }
 
+.picnic-feature.is-open ~ .landing-info-panel {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .picnic-feature__image {
   min-height: 0;
   overflow: hidden;
   background: var(--color-peach);
+}
+
+.picnic-feature__image,
+.picnic-feature__eyebrow,
+.picnic-feature h2,
+.picnic-feature__description p,
+.picnic-feature__includes li {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+
+.picnic-feature.is-open .picnic-feature__image,
+.picnic-feature.is-open .picnic-feature__eyebrow,
+.picnic-feature.is-open h2,
+.picnic-feature.is-open .picnic-feature__description p,
+.picnic-feature.is-open .picnic-feature__includes li {
+  animation: picnic-feature-content-in 420ms var(--ease-out-strong) forwards;
+}
+
+.picnic-feature.is-open .picnic-feature__image {
+  animation-delay: 390ms;
+}
+
+.picnic-feature.is-open .picnic-feature__eyebrow {
+  animation-delay: 470ms;
+}
+
+.picnic-feature.is-open h2 {
+  animation-delay: 550ms;
+}
+
+.picnic-feature.is-open .picnic-feature__description p:nth-child(1) {
+  animation-delay: 630ms;
+}
+
+.picnic-feature.is-open .picnic-feature__description p:nth-child(2) {
+  animation-delay: 710ms;
+}
+
+.picnic-feature.is-open .picnic-feature__includes li:nth-child(1) {
+  animation-delay: 790ms;
+}
+
+.picnic-feature.is-open .picnic-feature__includes li:nth-child(2) {
+  animation-delay: 850ms;
+}
+
+.picnic-feature.is-open .picnic-feature__includes li:nth-child(3) {
+  animation-delay: 910ms;
+}
+
+.picnic-feature.is-open .picnic-feature__includes li:nth-child(4) {
+  animation-delay: 970ms;
+}
+
+@keyframes picnic-feature-content-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .picnic-feature__image img {
@@ -790,7 +856,7 @@ button.experience__meta--cta:focus-visible {
   position: fixed;
   left: max(0.875rem, env(safe-area-inset-left));
   bottom: var(--landing-floating-bottom);
-  z-index: 10310;
+  z-index: 10330;
   min-height: var(--landing-frost-chip-height);
   padding: 0 1rem;
   border: var(--landing-frost-chip-border);
