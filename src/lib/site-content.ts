@@ -63,7 +63,7 @@ export const siteContent: SiteContent = {
       "Wild Grace is a summer photo day and picnic experience in a Warsaw park with soft styling, makeup inspiration, and warm editorial portraits.",
   },
   projectTitle: "WILD GRACE",
-  overlineLabel: "PHOTO DAY / PICNIC EXPERIENCE",
+  overlineLabel: "PHOTO DAY | PICNIC EXPERIENCE",
   location: "WARSAW",
   date: "28.06.2026",
   priceLabel: "1250 PLN",
@@ -79,7 +79,7 @@ export const siteContent: SiteContent = {
     "PHOTO DAY BY",
     "@liza_karasiova",
     "@lina_tsapova",
-    "PHOTO DAY / PICNIC EXPERIENCE",
+    "PHOTO DAY | PICNIC EXPERIENCE",
   ],
   picnicFeature: {
     eyebrow: "ТОЛЬКО В ЭТОМ ФОТОДНЕ",
@@ -99,7 +99,7 @@ export const siteContent: SiteContent = {
   },
   signup: {
     title: "1250 PLN",
-    titleSubline: "Photo Day / Picnic Experience",
+    titleSubline: "Photo Day | Picnic Experience",
     spotsLeftText: "Количество мест ограничено",
     intro: [
       "В стоимость входит подготовка образа со стилистом, makeup inspiration, персональная съемка, готовые фотографии и picnic experience после съемки.",

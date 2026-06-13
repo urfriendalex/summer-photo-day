@@ -40,7 +40,7 @@ export async function sendBookingEmail(payload: BookingPayload) {
     to: [bookingEmailTo],
     subject: `Новая заявка WILD GRACE: ${payload.name}`,
     text: [
-      "Новая заявка на WILD GRACE PHOTO DAY / PICNIC EXPERIENCE",
+      "Новая заявка на WILD GRACE PHOTO DAY | PICNIC EXPERIENCE",
       "",
       `Имя: ${payload.name}`,
       `Email: ${payload.email}`,
@@ -62,7 +62,7 @@ export async function sendBookingTelegram(payload: BookingPayload) {
   const chatId = getRequiredEnv("TELEGRAM_CHAT_ID");
 
   const text = [
-    "Новая заявка на WILD GRACE PHOTO DAY / PICNIC EXPERIENCE",
+    "Новая заявка на WILD GRACE PHOTO DAY | PICNIC EXPERIENCE",
     `Имя: ${payload.name}`,
     `Email: ${payload.email}`,
     `Instagram: ${payload.instagram}`,

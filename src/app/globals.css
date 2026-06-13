@@ -465,7 +465,9 @@ main.experience--preloader:not(.experience--preloader-reveal) ~ .landing-info-pa
   padding-inline: var(--page-pad-x);
   padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem);
   padding-bottom: 0.35rem;
-  background: var(--color-bg);
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
+  backdrop-filter: blur(var(--landing-info-frost-blur));
 }
 
 .experience__nav {
@@ -667,6 +669,8 @@ button.experience__meta--cta:focus-visible {
   gap: clamp(1.25rem, 3vw, 3.5rem);
   padding: clamp(1rem, 2.5vw, 2.5rem);
   background: var(--color-butter);
+  -webkit-backdrop-filter: blur(28px) saturate(0.82);
+  backdrop-filter: blur(28px) saturate(0.82);
   opacity: 0;
   visibility: hidden;
   transform: translateY(1rem);
@@ -764,19 +768,21 @@ button.experience__meta--cta:focus-visible {
   z-index: 10060;
   min-height: var(--landing-frost-chip-height);
   padding: 0 1rem;
-  border: 1px solid var(--color-accent);
+  border: var(--landing-frost-chip-border);
   border-radius: var(--radius-base);
-  background: var(--color-accent);
-  color: #fffdf9;
+  background: color-mix(in srgb, var(--color-surface) 68%, transparent);
+  color: var(--color-ink);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   cursor: pointer;
+  -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
+  backdrop-filter: blur(var(--landing-info-frost-blur));
 }
 
 .picnic-feature-toggle.is-open {
-  background: var(--color-bg);
-  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  color: var(--color-ink);
 }
 
 /* One block per visual line (matches DOM probe in `visual-line-wrap.ts`) */
