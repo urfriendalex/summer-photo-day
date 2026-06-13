@@ -467,8 +467,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   width: 100%;
   min-width: 0;
   position: relative;
-  z-index: 10100;
-  isolation: isolate;
+  z-index: 30;
   padding-block: 0.35rem;
 }
 
@@ -477,7 +476,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   left: 0;
   right: 0;
   top: 0;
-  z-index: 10100;
+  z-index: 50;
   box-sizing: border-box;
   padding-inline: var(--page-pad-x);
   padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem);
@@ -1948,11 +1947,6 @@ button.experience__meta--cta:focus-visible {
 }
 
 @media (max-width: 720px) {
-  .experience__nav-row--docked {
-    top: env(safe-area-inset-top, 0px);
-    padding-top: 0.35rem;
-  }
-
   .experience--landing {
     height: 100svh;
     min-height: 100svh;
