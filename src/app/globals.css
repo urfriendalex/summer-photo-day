@@ -482,7 +482,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   padding-inline: var(--page-pad-x);
   padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem);
   padding-bottom: 0.35rem;
-  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  background: var(--color-bg);
 }
 
 .experience__nav {
