@@ -58,6 +58,7 @@ type ExperienceProps = {
   content: SiteContent;
   marqueeImages: string[];
   topicImages: Record<TopicKey, string[]>;
+  picnicImages: string[];
 };
 
 type ExperienceMode = "landing" | "signup" | TopicKey;
@@ -75,10 +76,12 @@ export function SummerPhotoDayExperience({
   content,
   marqueeImages,
   topicImages,
+  picnicImages,
 }: ExperienceProps) {
   const [activeMode, setActiveMode] = useState<ExperienceMode>("landing");
   const [activeTopic, setActiveTopic] = useState<TopicKey | null>(null);
   const [isLandingInfoOpen, setIsLandingInfoOpen] = useState(false);
+  const [isPicnicFeatureOpen, setIsPicnicFeatureOpen] = useState(false);
   const landingInfoPanelRef = useRef<HTMLDivElement | null>(null);
   const marqueeViewportRef = useRef<HTMLDivElement | null>(null);
   const marqueeGroupRef = useRef<HTMLDivElement | null>(null);
@@ -322,10 +325,6 @@ export function SummerPhotoDayExperience({
   }, [applyMode]);
 
   const toggleLandingInfo = useCallback(() => {
-    if (!window.matchMedia("(max-width: 720px)").matches) {
-      return;
-    }
-
     setIsLandingInfoOpen((current) => !current);
   }, []);
 
@@ -420,6 +419,7 @@ export function SummerPhotoDayExperience({
     }
 
     setIsLandingInfoOpen(false);
+    setIsPicnicFeatureOpen(false);
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -440,18 +440,16 @@ export function SummerPhotoDayExperience({
     };
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!mobileLandingInfoMq.matches) {
-        setIsLandingInfoOpen(false);
-        return;
-      }
-
       const panel = landingInfoPanelRef.current;
       if (!panel || panel.contains(event.target as Node)) {
         return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
+      if (mobileLandingInfoMq.matches) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
       setIsLandingInfoOpen(false);
     };
 
@@ -1153,7 +1151,9 @@ export function SummerPhotoDayExperience({
                 />
               </article>
             ) : (
-              <div className="landing-panel">
+              <div
+                className={`landing-panel${isPicnicFeatureOpen ? " landing-panel--picnic" : ""}`}
+              >
                 <div
                   ref={marqueeViewportRef}
                   className="marquee"
@@ -1197,6 +1197,32 @@ export function SummerPhotoDayExperience({
                     )}
                   </div>
                 </div>
+                <article
+                  className="picnic-feature"
+                  aria-hidden={!isPicnicFeatureOpen}
+                >
+                  <div className="picnic-feature__image">
+                    {picnicImages[0] ? (
+                      <img src={picnicImages[0]} alt="" />
+                    ) : null}
+                  </div>
+                  <div className="picnic-feature__content">
+                    <p className="picnic-feature__eyebrow">
+                      {content.picnicFeature.eyebrow}
+                    </p>
+                    <h2>{content.picnicFeature.title}</h2>
+                    <div className="picnic-feature__description">
+                      {content.picnicFeature.description.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                    </div>
+                    <ul className="picnic-feature__includes">
+                      {content.picnicFeature.includes.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
               </div>
             )}
           </section>
@@ -1259,29 +1285,29 @@ export function SummerPhotoDayExperience({
       </main>
 
       {onLanding ? (
+        <button
+          className={`picnic-feature-toggle interactive${isPicnicFeatureOpen ? " is-open" : ""}`}
+          type="button"
+          aria-pressed={isPicnicFeatureOpen}
+          onClick={() => {
+            setIsLandingInfoOpen(false);
+            setIsPicnicFeatureOpen((current) => !current);
+          }}
+        >
+          {isPicnicFeatureOpen
+            ? content.picnicFeature.closeLabel
+            : content.picnicFeature.openLabel}
+        </button>
+      ) : null}
+
+      {onLanding ? (
         <div
           id="landing-info-panel"
           ref={landingInfoPanelRef}
           className={`landing-info-panel${isLandingInfoOpen ? " is-open" : ""}`}
           role="region"
-          aria-label="Summer Photo Day details"
+          aria-label="Garden Elegance details"
         >
-          <button
-            className="landing-info-panel__toggle interactive"
-            type="button"
-            aria-label={
-              isLandingInfoOpen ? "Hide footer details" : "Show footer details"
-            }
-            aria-controls="landing-info-panel-body"
-            aria-expanded={isLandingInfoOpen}
-            onClick={toggleLandingInfo}
-          >
-            <span
-              className="landing-info-panel__toggle-icon"
-              aria-hidden="true"
-            />
-          </button>
-
           <div
             id="landing-info-panel-body"
             className="landing-info-panel__body"
@@ -1333,6 +1359,25 @@ export function SummerPhotoDayExperience({
               })}
             </div>
           </div>
+
+          <button
+            className="landing-info-panel__toggle interactive"
+            type="button"
+            aria-label={
+              isLandingInfoOpen ? "Hide footer details" : "Show footer details"
+            }
+            aria-controls="landing-info-panel-body"
+            aria-expanded={isLandingInfoOpen}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={toggleLandingInfo}
+          >
+            <span
+              className="landing-info-panel__toggle-icon"
+              aria-hidden="true"
+            />
+          </button>
         </div>
       ) : null}
       {headerMetaCursorPos

@@ -7,14 +7,16 @@ export default function Home() {
   const topicImages = {
     style: getImagesFromPublicFolder("media/mood"),
     photo: getImagesFromPublicFolder("media/photo"),
-    picnic: getImagesFromPublicFolder("media/picnic"),
+    makeup: getImagesFromPublicFolder("media/mood"),
   };
+  const picnicImages = getImagesFromPublicFolder("media/picnic");
 
   return (
     <SummerPhotoDayExperience
       content={siteContent}
       marqueeImages={marqueeImages}
       topicImages={topicImages}
+      picnicImages={picnicImages}
     />
   );
 }
