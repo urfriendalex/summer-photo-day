@@ -955,8 +955,8 @@ export function SummerPhotoDayExperience({
     }
 
     const ro = new ResizeObserver(() => {
+      setNavRowPadHeight(el.offsetHeight);
       if (!navDockedRef.current) {
-        setNavRowPadHeight(el.offsetHeight);
         pinScrollYRef.current = el.getBoundingClientRect().top + window.scrollY;
       }
       syncNavDock();
