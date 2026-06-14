@@ -79,6 +79,7 @@ export const siteContent: SiteContent = {
     "PHOTO DAY BY",
     "@liza_karasiova",
     "@lina_tsapova",
+    "@mateynastya",
     "PHOTO DAY / PICNIC EXPERIENCE",
   ],
   picnicFeature: {
@@ -102,7 +103,7 @@ export const siteContent: SiteContent = {
     titleSubline: "Photo Day | Picnic Experience",
     spotsLeftText: "Количество мест ограничено",
     intro: [
-      "В стоимость входит подготовка образа со стилистом, makeup inspiration, персональная съемка, готовые фотографии и picnic experience после съемки.",
+      "В стоимость входит подготовка образа со стилистом, makeup в стилистике WILD GRACE, персональная съемка, готовые 12-15 фотографий и совместное времяпрепровождение за пикником с другими участницами.",
       "Оставьте заявку, и мы свяжемся с вами в Instagram, чтобы подтвердить место и обсудить детали образа.",
     ],
     fields: {

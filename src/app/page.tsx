@@ -16,7 +16,7 @@ export default function Home() {
       content={siteContent}
       marqueeImages={marqueeImages}
       topicImages={topicImages}
-      picnicImages={styleImages}
+      picnicImages={["/media/picnic.JPG"]}
     />
   );
 }
