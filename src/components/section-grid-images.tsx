@@ -158,19 +158,12 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
       return;
     }
 
-    const scrollY = window.scrollY;
     const root = document.documentElement;
     const previousRootOverflow = root.style.overflow;
     const previousBodyOverflow = document.body.style.overflow;
-    const previousBodyPosition = document.body.style.position;
-    const previousBodyTop = document.body.style.top;
-    const previousBodyWidth = document.body.style.width;
 
     root.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = "100%";
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -183,10 +176,6 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     return () => {
       root.style.overflow = previousRootOverflow;
       document.body.style.overflow = previousBodyOverflow;
-      document.body.style.position = previousBodyPosition;
-      document.body.style.top = previousBodyTop;
-      document.body.style.width = previousBodyWidth;
-      window.scrollTo(0, scrollY);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [activeImageIndex, closeImage]);
