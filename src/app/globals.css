@@ -411,16 +411,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   white-space: nowrap;
 }
 
-.experience__title-stack {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-  vertical-align: top;
-}
-
 .experience__title-reveal-clip {
-  position: relative;
-  z-index: 1;
   display: inline-block;
   max-width: 100%;
   vertical-align: top;

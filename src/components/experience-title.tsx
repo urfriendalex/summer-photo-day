@@ -23,8 +23,8 @@ const OVERLINE_INTRO_FROM = {
 } as const;
 
 const INTRO_BEAT_GAP = 0.07;
-const INTRO_GUTTER_PX = 24;
 
+/** Stagger opacity/blur ahead of depth so the reveal eases in rather than popping. */
 function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     gsap
@@ -68,9 +68,9 @@ type ExperienceTitleProps = {
   label: string;
   overlineLabel: string;
   onClick: () => void;
-  /** When true, reveal at center, then move into the final header position. */
+  /** When true, run the intro: centered reveal, then Flip to header after window load. */
   preloader?: boolean;
-  /** Fired once the move into the header finishes. */
+  /** Fired once the Flip-to-header animation finishes. */
   onPreloaderComplete?: () => void;
 };
 
@@ -114,6 +114,7 @@ function waitForWindowLoad(): Promise<void> {
   });
 }
 
+/** Match header bleed geometry so intro doesn’t re-center text (avoids a left jump on Flip). */
 function getBleedFrame(bleed: HTMLElement) {
   const rect = bleed.getBoundingClientRect();
   const layoutWidth =
@@ -310,6 +311,7 @@ function ExperienceTitleComponent({
 
         bleed.classList.add("experience__title-bleed--preloader-slot");
 
+        /* Depth reveal: scale + blur toward camera (center origin), no xy translate. */
         if (reduceMotion) {
           gsap.set(clip, { clearProps: "perspective" });
           gsap.set(track, { opacity: 1, scale: 1, z: 0, filter: "blur(0px)" });
@@ -331,14 +333,15 @@ function ExperienceTitleComponent({
           top: "50%",
           yPercent: -50,
           width: bleedFrame.width,
-          paddingLeft: `max(${INTRO_GUTTER_PX}px, env(safe-area-inset-left))`,
-          paddingRight: `max(${INTRO_GUTTER_PX}px, env(safe-area-inset-right))`,
-          textAlign: "center",
+          textAlign: "left",
           boxSizing: "border-box",
           zIndex: 10050,
           opacity: 1,
         });
-        applyFit();
+
+        if (cancelled) {
+          return;
+        }
 
         if (!reduceMotion) {
           await animateIntroSequence(track, overline);
@@ -361,12 +364,13 @@ function ExperienceTitleComponent({
           width: bleedFrameBeforeFlip.width,
         });
 
+        /** Record fixed intro layout, then snap to natural header in the DOM; Flip animates into place. */
         const state = Flip.getState(titleRoot);
 
         bleed.classList.remove("experience__title-bleed--preloader-slot");
         gsap.set(titleRoot, {
           clearProps:
-            "position,left,top,width,paddingLeft,paddingRight,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
         });
         gsap.set(titleRoot, { opacity: 1 });
 
@@ -379,7 +383,7 @@ function ExperienceTitleComponent({
             introFinishedRef.current = true;
             gsap.set(titleRoot, {
               clearProps:
-                "transform,x,y,xPercent,yPercent,left,top,width,paddingLeft,paddingRight,textAlign",
+                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
             });
             gsap.set(titleRoot, { opacity: 1 });
             gsap.set(track, { clearProps: "opacity,transform,filter" });
@@ -414,13 +418,11 @@ function ExperienceTitleComponent({
         onKeyDown={handleKeyDown}
         aria-label={label}
       >
-        <span className="experience__title-stack">
-          <span className="experience__title-reveal-clip">
-            <span className="experience__title-reveal-track">{label}</span>
-          </span>
-          <span className="experience__title-overline" aria-hidden="true">
-            {overlineLabel}
-          </span>
+        <span className="experience__title-reveal-clip">
+          <span className="experience__title-reveal-track">{label}</span>
+        </span>
+        <span className="experience__title-overline" aria-hidden="true">
+          {overlineLabel}
         </span>
       </div>
     </div>
