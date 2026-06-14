@@ -285,7 +285,7 @@ input {
   /* Body already clips horizontal overflow; keep bleed overflow visible so script
      descenders (e.g. “g”) aren’t cut once preloader-intro clears overflow overrides. */
   overflow: visible;
-  z-index: 30;
+  z-index: 31;
 }
 
 .experience__title {
@@ -300,13 +300,14 @@ input {
   border: 0;
   margin: 0;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--color-accent);
+  /* Fallback before ExperienceTitle measures (SSR / first paint) */
   font-family: var(--font-title), var(--font-title-fallback);
   font-size: clamp(2.8rem, 14vw, 9.5rem);
   font-weight: 400;
-  line-height: 0.5;
-  letter-spacing: 0;
-  text-transform: lowercase;
+  line-height: 1.1;
+  letter-spacing: 0em;
+  text-transform: none;
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
@@ -393,20 +394,20 @@ main.experience--preloader-reveal ~ .landing-info-panel {
 
 .experience__title-overline {
   position: absolute;
-  right: clamp(-1.4rem, -1.5vw, -0.5rem);
-  bottom: clamp(0.75rem, 0.75vh, 2rem);
-  z-index: 2;
-  display: block;
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(0.625rem, 1.15vw, 1.15rem);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  top: 88%;
+  right: 8%;
+  z-index: 0;
+  display: inline-block;
+  transform: translateY(-50%);
+  font-family: var(--font-title), var(--font-title-fallback);
+  font-size: clamp(0.9375rem, 5.8vw, 3.75rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  /* Script italic swashes extend past the layout box — pad so Safari doesn't slice glyphs. */
   padding-block: 0.14em;
-  padding-inline: 0.5em;
+  padding-inline: 0.5em 0.12em;
   color: var(--color-ink);
-  background: transparent;
   pointer-events: none;
   white-space: nowrap;
 }
