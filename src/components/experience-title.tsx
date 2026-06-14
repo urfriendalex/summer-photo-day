@@ -23,6 +23,7 @@ const OVERLINE_INTRO_FROM = {
 } as const;
 
 const INTRO_BEAT_GAP = 0.07;
+const INTRO_GUTTER_PX = 24;
 
 function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
@@ -330,11 +331,14 @@ function ExperienceTitleComponent({
           top: "50%",
           yPercent: -50,
           width: bleedFrame.width,
-          textAlign: "left",
+          paddingLeft: `max(${INTRO_GUTTER_PX}px, env(safe-area-inset-left))`,
+          paddingRight: `max(${INTRO_GUTTER_PX}px, env(safe-area-inset-right))`,
+          textAlign: "center",
           boxSizing: "border-box",
           zIndex: 10050,
           opacity: 1,
         });
+        applyFit();
 
         if (!reduceMotion) {
           await animateIntroSequence(track, overline);
@@ -362,7 +366,7 @@ function ExperienceTitleComponent({
         bleed.classList.remove("experience__title-bleed--preloader-slot");
         gsap.set(titleRoot, {
           clearProps:
-            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+            "position,left,top,width,paddingLeft,paddingRight,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
         });
         gsap.set(titleRoot, { opacity: 1 });
 
@@ -375,7 +379,7 @@ function ExperienceTitleComponent({
             introFinishedRef.current = true;
             gsap.set(titleRoot, {
               clearProps:
-                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
+                "transform,x,y,xPercent,yPercent,left,top,width,paddingLeft,paddingRight,textAlign",
             });
             gsap.set(titleRoot, { opacity: 1 });
             gsap.set(track, { clearProps: "opacity,transform,filter" });
