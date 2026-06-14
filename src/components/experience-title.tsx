@@ -9,44 +9,58 @@ gsap.registerPlugin(Flip);
 
 const TITLE_INTRO_FROM = {
   opacity: 0,
-  filter: "blur(12px)",
+  scale: 0.94,
+  z: -28,
+  filter: "blur(10px)",
+  transformOrigin: "50% 50%",
+  force3D: true,
 } as const;
 
 const OVERLINE_INTRO_FROM = {
   opacity: 0,
-  filter: "blur(8px)",
+  filter: "blur(4px)",
+  force3D: true,
 } as const;
 
-function animateBlurIntro(
-  track: HTMLElement,
-  overline: HTMLElement,
-): Promise<void> {
+const INTRO_BEAT_GAP = 0.07;
+
+function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     gsap
       .timeline({
+        defaults: { force3D: true, transformOrigin: "50% 50%" },
         onComplete: resolve,
       })
+      .to(track, { opacity: 1, duration: 0.52, ease: "power2.out" }, 0)
       .to(
         track,
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.7,
-          ease: "power2.out",
-        },
-        0,
+        { filter: "blur(0px)", duration: 0.74, ease: "power2.out" },
+        0.04,
       )
+      .to(track, { scale: 1, z: 0, duration: 0.9, ease: "power3.out" }, 0);
+  });
+}
+
+function animateOverlineIntro(overline: HTMLElement): Promise<void> {
+  return new Promise((resolve) => {
+    gsap
+      .timeline({ defaults: { force3D: true }, onComplete: resolve })
+      .to(overline, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0)
       .to(
         overline,
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        0.72,
+        { filter: "blur(0px)", duration: 0.52, ease: "power2.out" },
+        0.03,
       );
   });
+}
+
+async function animateIntroSequence(
+  track: HTMLElement,
+  overline: HTMLElement,
+): Promise<void> {
+  await animateTitleIntro(track);
+  await gsap.to({}, { duration: INTRO_BEAT_GAP });
+  await animateOverlineIntro(overline);
 }
 
 type ExperienceTitleProps = {
@@ -225,14 +239,20 @@ function ExperienceTitleComponent({
       const overline = titleRoot?.querySelector<HTMLElement>(
         ".experience__title-overline",
       );
+      const clip = titleRoot?.querySelector<HTMLElement>(
+        ".experience__title-reveal-clip",
+      );
       if (titleRoot) {
         gsap.killTweensOf(titleRoot);
         gsap.set(titleRoot, { clearProps: "opacity,visibility" });
       }
+      if (clip) {
+        gsap.set(clip, { clearProps: "perspective" });
+      }
       if (track) {
         gsap.killTweensOf(track);
         gsap.set(track, {
-          clearProps: "opacity,filter",
+          clearProps: "opacity,transform,filter,transformOrigin",
         });
       }
       if (overline) {
@@ -255,7 +275,10 @@ function ExperienceTitleComponent({
     const overline = titleRoot?.querySelector<HTMLElement>(
       ".experience__title-overline",
     );
-    if (!bleed || !titleRoot || !track || !overline) {
+    const clip = titleRoot?.querySelector<HTMLElement>(
+      ".experience__title-reveal-clip",
+    );
+    if (!bleed || !titleRoot || !track || !overline || !clip) {
       return;
     }
 
@@ -287,15 +310,11 @@ function ExperienceTitleComponent({
         bleed.classList.add("experience__title-bleed--preloader-slot");
 
         if (reduceMotion) {
-          gsap.set(track, {
-            opacity: 1,
-            filter: "blur(0px)",
-          });
-          gsap.set(overline, {
-            opacity: 1,
-            filter: "blur(0px)",
-          });
+          gsap.set(clip, { clearProps: "perspective" });
+          gsap.set(track, { opacity: 1, scale: 1, z: 0, filter: "blur(0px)" });
+          gsap.set(overline, { opacity: 1, filter: "blur(0px)" });
         } else {
+          gsap.set(clip, { perspective: 1100 });
           gsap.set(track, TITLE_INTRO_FROM);
           gsap.set(overline, OVERLINE_INTRO_FROM);
         }
@@ -318,9 +337,10 @@ function ExperienceTitleComponent({
         });
 
         if (!reduceMotion) {
-          await animateBlurIntro(track, overline);
-          gsap.set(track, { clearProps: "filter" });
+          await animateIntroSequence(track, overline);
+          gsap.set(track, { clearProps: "transform,filter,transformOrigin" });
           gsap.set(overline, { clearProps: "filter" });
+          gsap.set(clip, { clearProps: "perspective" });
         }
         if (cancelled) {
           return;
@@ -358,7 +378,7 @@ function ExperienceTitleComponent({
                 "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
             });
             gsap.set(titleRoot, { opacity: 1 });
-            gsap.set(track, { clearProps: "opacity,filter" });
+            gsap.set(track, { clearProps: "opacity,transform,filter" });
             gsap.set(overline, { clearProps: "opacity,filter" });
             onPreloaderComplete?.();
           },
