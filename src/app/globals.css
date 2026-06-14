@@ -323,6 +323,8 @@ input {
 .experience--preloader-intro
   .experience__title.experience__title--intro-surface {
   opacity: 1;
+  /* The italic title font paints the opening swash left of its layout box. */
+  padding-left: max(clamp(18px, 5vw, 28px), env(safe-area-inset-left));
 }
 
 /* Overlay is a main child with z-index 10040; without this, it paints above the whole section and hides the title. */
