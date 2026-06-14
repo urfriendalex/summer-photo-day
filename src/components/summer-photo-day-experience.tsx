@@ -1127,7 +1127,7 @@ export function SummerPhotoDayExperience({
                           href={activeContent.personUrl}
                           target="_blank"
                           rel="noreferrer noopener"
-                          className="topic-detail__heading-link interactive interactive--accent"
+                          className="topic-detail__heading-link text-link text-link--drawn interactive interactive--accent"
                         >
                           {line}
                         </a>
@@ -1204,7 +1204,7 @@ export function SummerPhotoDayExperience({
                               key={`${groupIndex}-${image}-${index}`}
                               className="marquee__item"
                             >
-                              <img src={image} alt="" />
+                              <img src={image} alt="" decoding="async" />
                             </figure>
                           ))}
                         </div>
@@ -1287,7 +1287,14 @@ export function SummerPhotoDayExperience({
           aria-label="Picnic experience details"
         >
           <div className="picnic-feature__image">
-            {picnicImages[0] ? <img src={picnicImages[0]} alt="" /> : null}
+            {picnicImages[0] ? (
+              <img
+                src={picnicImages[0]}
+                alt=""
+                loading="lazy"
+                decoding="async"
+              />
+            ) : null}
           </div>
           <div className="picnic-feature__content">
             <p className="picnic-feature__eyebrow">

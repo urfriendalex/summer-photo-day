@@ -1,31 +1,29 @@
 :root {
-  /* Wild Grace — ecru layers with deep espresso type */
-  --color-accent: #9a8724;
-  --color-bg: #eee7d8;
-  --color-surface: #f6f1e7;
-  --color-ink: #211a14;
-  --color-ink-soft: rgba(33, 26, 20, 0.68);
-  --color-baby-yellow: #dfcf62;
-  --color-pastel-yellow: #dfcf62;
-  --color-pastel-yellow-soft: rgba(223, 207, 98, 0.62);
-  --color-butter: rgba(246, 241, 231, 0.72);
-  --color-peach: #ded4c2;
+  /* Butter Picnic — sun-warmed yellow, creamy ecru, and cocoa type */
+  --color-accent: #d9bb62;
+  --color-bg: #f4ecdc;
+  --color-surface: #fbf5e9;
+  --color-ink: #4a3528;
+  --color-ink-soft: rgba(74, 53, 40, 0.68);
+  --color-pastel-yellow: #ecd58d;
+  --color-peach: #e8d9bd;
+
+  --font-title-fallback: "Pinyon Script", cursive;
 
   --radius-base: 0;
 
   /* Interaction — shared hover/focus color shifts (see .interactive in globals.css) */
   --ease-interaction: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-interaction: 160ms;
-  --color-interactive-ink-hover: #7f6f1c;
-  --color-interactive-accent-hover: #665812;
-  --color-interactive-inverse-bg-hover: #dfcf62;
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --color-interactive-ink-hover: #9a7125;
+  --color-interactive-accent-hover: #a88632;
+  --color-interactive-inverse-bg-hover: var(--color-pastel-yellow);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-panel-enter: 240ms;
-  --landing-info-frost-bg: rgba(246, 241, 231, 0.66);
+  --landing-info-frost-bg: rgba(251, 245, 232, 0.7);
   --landing-info-frost-blur: 24px;
   /* Shared frosted chip — `.landing-info-panel` (+) and register CTA pill */
-  --landing-frost-chip-border: 1px solid rgba(33, 26, 20, 0.28);
+  --landing-frost-chip-border: 1px solid rgba(74, 53, 40, 0.24);
   --landing-frost-chip-height: 48px;
   --landing-info-panel-pad: 1.25rem;
   --landing-info-panel-toggle-reserve: 3.25rem;
@@ -33,9 +31,7 @@
   --landing-info-toggle-offset-y: 14px;
 
   /* Drawn underline: `.text-link--drawn` + nav `.link-underline` (see globals.css) */
-  --color-text-link: var(--color-ink);
   --link-underline-duration: 300ms;
-  --ease-link-underline: cubic-bezier(0.23, 1, 0.32, 1);
 
   --page-pad-x: clamp(0.5rem, 1vw, 1rem);
   --page-pad-y: clamp(0.65rem, 1.5vw, 1rem);
@@ -63,7 +59,5 @@
   --landing-mobile-header-height: 98px;
   /* Taller strip on ≤720px */
   --landing-mobile-marquee-item-height: clamp(24rem, 111vw, 35rem);
-  /* Bottom register / Back pill — matches collapsed `.landing-info-panel` footprint */
-  --landing-mobile-cta-height: var(--landing-frost-chip-height);
   --landing-mobile-cta-font-size: 0.8125rem;
 }

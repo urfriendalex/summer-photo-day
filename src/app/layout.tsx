@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Inter } from "next/font/google";
+import { Inter, Pinyon_Script } from "next/font/google";
 
 import { siteContent } from "@/lib/site-content";
 
@@ -11,6 +11,14 @@ const bodyFont = Inter({
   weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin", "cyrillic"],
   variable: "--font-body",
+  display: "swap",
+  adjustFontFallback: true,
+});
+
+const titleFont = Pinyon_Script({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-title",
   display: "swap",
   adjustFontFallback: true,
 });
@@ -68,7 +76,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={bodyFont.variable}>
+      <body className={`${bodyFont.variable} ${titleFont.variable}`}>
         {children}
         <Analytics />
       </body>

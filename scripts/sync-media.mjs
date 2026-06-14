@@ -1,5 +1,5 @@
 /**
- * Import reference images from the sorted project folder and emit web-ready JPEGs.
+ * Import reference images from the sorted project folder and emit web-ready WebP files.
  *
  * Default source: ~/Downloads/projects-files/summer photo day
  * Override: MEDIA_SOURCE_ROOT=/path/to/source pnpm media:sync
@@ -19,7 +19,7 @@ const SOURCE_ROOT =
 /** Longest edge cap — matches the existing landing media set. */
 const MAX_WIDTH = 1280;
 const MAX_HEIGHT = 1800;
-const JPEG_QUALITY = 82;
+const WEBP_QUALITY = 80;
 
 const GROUPS = [
   { sourceDir: "style ref", targetDir: "public/media/style", prefix: "style" },
@@ -49,7 +49,7 @@ function clearTargetImages(dir) {
   }
 }
 
-async function optimizeToJpeg(inputPath, outputPath) {
+async function optimizeToWebp(inputPath, outputPath) {
   await sharp(inputPath)
     .rotate()
     .resize({
@@ -58,7 +58,7 @@ async function optimizeToJpeg(inputPath, outputPath) {
       fit: "inside",
       withoutEnlargement: true,
     })
-    .jpeg({ quality: JPEG_QUALITY, mozjpeg: true, progressive: true })
+    .webp({ quality: WEBP_QUALITY, effort: 5, smartSubsample: true })
     .toFile(outputPath);
 }
 
@@ -77,11 +77,11 @@ async function syncGroup({ sourceDir, targetDir, prefix }) {
 
   for (let index = 0; index < files.length; index += 1) {
     const file = files[index];
-    const outName = `${prefix}-${String(index + 1).padStart(2, "0")}.jpg`;
+    const outName = `${prefix}-${String(index + 1).padStart(2, "0")}.webp`;
     const inputPath = path.join(srcPath, file);
     const outputPath = path.join(destPath, outName);
 
-    await optimizeToJpeg(inputPath, outputPath);
+    await optimizeToWebp(inputPath, outputPath);
     const { size } = fs.statSync(outputPath);
     console.log(`  ${outName}  ←  ${file}  (${Math.round(size / 1024)} KB)`);
   }
@@ -107,7 +107,7 @@ async function main() {
     console.log(`  → ${count} image(s)\n`);
   }
 
-  console.log(`Done — ${total} optimized JPEGs in public/media.`);
+  console.log(`Done — ${total} optimized WebP files in public/media.`);
 }
 
 main().catch((error) => {

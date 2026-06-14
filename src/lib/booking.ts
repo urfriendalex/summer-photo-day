@@ -33,7 +33,8 @@ export async function sendBookingEmail(payload: BookingPayload) {
   const resend = new Resend(resendApiKey);
 
   const from =
-    process.env.BOOKING_EMAIL_FROM?.trim() || "Wild Grace <bookings@lizakarasiova.com>";
+    process.env.BOOKING_EMAIL_FROM?.trim() ||
+    "Wild Grace <bookings@lizakarasiova.com>";
 
   const result = await resend.emails.send({
     from,
@@ -50,7 +51,9 @@ export async function sendBookingEmail(payload: BookingPayload) {
 
   if (result.error) {
     const detail =
-      typeof result.error.message === "string" ? result.error.message : "Resend API error";
+      typeof result.error.message === "string"
+        ? result.error.message
+        : "Resend API error";
     console.error("[booking] Resend email failed:", detail);
   }
 
@@ -68,17 +71,20 @@ export async function sendBookingTelegram(payload: BookingPayload) {
     `Instagram: ${payload.instagram}`,
   ].join("\n");
 
-  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `https://api.telegram.org/bot${botToken}/sendMessage`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+      }),
+      cache: "no-store",
     },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-    }),
-    cache: "no-store",
-  });
+  );
 
   if (!response.ok) {
     throw new Error("Telegram delivery failed.");

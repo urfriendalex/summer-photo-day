@@ -37,7 +37,7 @@ a {
 
 /* Base text link — no drawn line unless `.text-link--drawn` is added */
 .text-link {
-  color: var(--color-text-link);
+  color: var(--color-ink);
   text-decoration: none;
 }
 
@@ -74,7 +74,7 @@ a {
   .link-underline::after,
   .text-link--drawn::after {
     transition: transform var(--link-underline-duration)
-      var(--ease-link-underline);
+      var(--ease-interaction);
   }
 }
 
@@ -109,16 +109,16 @@ a {
   border-radius: var(--radius-base);
 }
 
-/* Active section: accent color only — no drawn underline */
+/* Active section keeps the same drawn underline language as other links. */
 .experience__nav-item.link-underline.is-active::after {
-  transform-origin: 100% 50%;
-  transform: scale3d(0, 1, 1);
+  transform-origin: 0% 50%;
+  transform: scale3d(1, 1, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .experience__nav-item.link-underline.is-active:hover::after,
   .experience__nav-item.link-underline.is-active:focus-visible::after {
-    transform: scale3d(0, 1, 1);
+    transform: scale3d(1, 1, 1);
   }
 }
 
@@ -142,8 +142,8 @@ a {
   .experience__nav-item.link-underline.is-active::after,
   .experience__nav-item.link-underline.is-active:hover::after,
   .experience__nav-item.link-underline.is-active:focus-visible::after {
-    transform-origin: 100% 50%;
-    transform: scale3d(0, 1, 1);
+    transform-origin: 0% 50%;
+    transform: scale3d(1, 1, 1);
   }
 }
 
@@ -302,12 +302,12 @@ input {
   margin: 0;
   background: transparent;
   color: var(--color-ink);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-title), var(--font-title-fallback);
   font-size: clamp(2.8rem, 14vw, 9.5rem);
-  font-weight: 800;
-  line-height: 0.78;
-  letter-spacing: 0em;
-  text-transform: uppercase;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: lowercase;
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
@@ -394,12 +394,12 @@ main.experience--preloader-reveal ~ .landing-info-panel {
 
 .experience__title-overline {
   position: absolute;
-  right: 0.1em;
-  bottom: -0.15em;
+  right: clamp(-1.4rem, -1.5vw, -0.5rem);
+  bottom: clamp(1.35rem, 3.2vw, 3rem);
   z-index: 2;
   display: block;
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(.625rem, 1.15vw, 1.15rem);
+  font-size: clamp(0.625rem, 1.15vw, 1.15rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.04em;
@@ -407,7 +407,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
   padding-block: 0.14em;
   padding-inline: 0.5em;
   color: var(--color-ink);
-  background: var(--color-pastel-yellow);
+  background: transparent;
   pointer-events: none;
   white-space: nowrap;
 }
@@ -515,7 +515,7 @@ main.experience--preloader-reveal ~ .landing-info-panel {
 
 .experience__nav-item.is-active {
   color: var(--color-ink);
-  background: var(--color-pastel-yellow);
+  background: transparent;
 }
 
 .experience__meta {
@@ -696,7 +696,7 @@ button.experience__meta--cta:focus-visible {
   transform-origin: left bottom;
   pointer-events: none;
   transition:
-    opacity var(--duration-panel-enter) var(--ease-out-strong),
+    opacity var(--duration-panel-enter) var(--ease-interaction),
     transform 360ms var(--ease-drawer),
     visibility 0s linear var(--duration-panel-enter);
 }
@@ -735,7 +735,7 @@ button.experience__meta--cta:focus-visible {
 .picnic-feature.is-open h2,
 .picnic-feature.is-open .picnic-feature__description p,
 .picnic-feature.is-open .picnic-feature__includes li {
-  animation: picnic-feature-content-in 420ms var(--ease-out-strong) forwards;
+  animation: picnic-feature-content-in 420ms var(--ease-interaction) forwards;
 }
 
 .picnic-feature.is-open .picnic-feature__image {
@@ -805,7 +805,7 @@ button.experience__meta--cta:focus-visible {
 .picnic-feature__eyebrow {
   margin-bottom: 0.85rem;
   color: var(--color-ink);
-  background: var(--color-pastel-yellow);
+  background: transparent;
   padding: 0.3rem 0.45rem;
   font-size: 0.7rem;
   font-weight: 800;
@@ -858,11 +858,7 @@ button.experience__meta--cta:focus-visible {
   padding: 0 1rem;
   border: var(--landing-frost-chip-border);
   border-radius: var(--radius-base);
-  background: color-mix(
-    in srgb,
-    var(--color-pastel-yellow) 72%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--color-pastel-yellow) 72%, transparent);
   color: var(--color-ink);
   font-size: 0.7rem;
   font-weight: 800;
@@ -871,7 +867,7 @@ button.experience__meta--cta:focus-visible {
   -webkit-backdrop-filter: blur(var(--landing-info-frost-blur));
   backdrop-filter: blur(var(--landing-info-frost-blur));
   transition:
-    opacity var(--duration-panel-enter) var(--ease-out-strong),
+    opacity var(--duration-panel-enter) var(--ease-interaction),
     color var(--duration-interaction) var(--ease-interaction),
     border-color var(--duration-interaction) var(--ease-interaction),
     background-color var(--duration-interaction) var(--ease-interaction);
@@ -1004,8 +1000,6 @@ button.experience__meta--cta:focus-visible {
 
 .topic-detail__link {
   position: relative;
-  z-index: 0;
-  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1014,22 +1008,10 @@ button.experience__meta--cta:focus-visible {
   padding-bottom: 0.14rem;
   color: var(--color-ink);
   background: transparent;
-  padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   text-decoration: none;
-}
-
-.topic-detail__link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--color-pastel-yellow-soft);
-  opacity: 0;
-  animation: filled-control-bg-in 280ms var(--ease-out-strong) forwards;
-  animation-delay: 520ms;
 }
 
 .topic-detail__link::after {
@@ -1041,14 +1023,14 @@ button.experience__meta--cta:focus-visible {
   top: 100%;
   pointer-events: none;
   background: currentColor;
-  transform-origin: 100% 50%;
-  transform: scale3d(0, 1, 1);
+  transform-origin: 0% 50%;
+  transform: scale3d(1, 1, 1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .topic-detail__link::after {
     transition: transform var(--link-underline-duration)
-      var(--ease-link-underline);
+      var(--ease-interaction);
   }
 }
 
@@ -1277,9 +1259,7 @@ button.experience__meta--cta:focus-visible {
   z-index: 10200;
   display: grid;
   grid-template-rows: 1fr;
-  padding:
-    var(--lightbox-pad-top)
-    clamp(0.35rem, 1.2vw, 0.75rem)
+  padding: var(--lightbox-pad-top) clamp(0.35rem, 1.2vw, 0.75rem)
     var(--lightbox-pad-bottom);
   background: rgba(0, 0, 0, 0.72);
   -webkit-backdrop-filter: blur(10px);
@@ -1379,13 +1359,9 @@ button.experience__meta--cta:focus-visible {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: color-mix(
-    in srgb,
-    var(--color-pastel-yellow) 88%,
-    transparent
-  );
+  background: color-mix(in srgb, var(--color-pastel-yellow) 88%, transparent);
   opacity: 0;
-  animation: filled-control-bg-in 280ms var(--ease-out-strong) forwards;
+  animation: filled-control-bg-in 280ms var(--ease-interaction) forwards;
   animation-delay: var(--filled-bg-delay, 0s);
 }
 
@@ -1471,7 +1447,7 @@ button.experience__meta--cta:focus-visible {
   padding-bottom: 0.72rem;
   opacity: 0;
   transform: translateY(8px);
-  animation: signup-form-field-in 315ms var(--ease-out-strong) forwards;
+  animation: signup-form-field-in 315ms var(--ease-interaction) forwards;
   animation-delay: var(--field-delay, 0s);
 }
 
@@ -1503,7 +1479,7 @@ button.experience__meta--cta:focus-visible {
   background: var(--color-ink);
   transform: scaleX(0);
   transform-origin: 0 50%;
-  animation: signup-form-line-reveal 420ms var(--ease-out-strong) forwards;
+  animation: signup-form-line-reveal 420ms var(--ease-interaction) forwards;
   animation-delay: calc(var(--field-delay, 0s) + 45ms);
 }
 
@@ -1523,7 +1499,7 @@ button.experience__meta--cta:focus-visible {
 @media (prefers-reduced-motion: no-preference) {
   .signup-form__field::after {
     transition: clip-path var(--link-underline-duration)
-      var(--ease-link-underline);
+      var(--ease-interaction);
   }
 }
 
@@ -1584,8 +1560,9 @@ button.experience__meta--cta:focus-visible {
   font-weight: 800;
   letter-spacing: -0.02em;
   padding: 0.3rem 0.45rem;
-  background: var(--color-pastel-yellow);
+  background: transparent;
   color: var(--color-ink);
+  mix-blend-mode: multiply;
   line-height: 1.3;
   text-align: right;
 }
@@ -1644,7 +1621,7 @@ button.experience__meta--cta:focus-visible {
 @media (prefers-reduced-motion: no-preference) {
   .signup-form__button::after {
     transition: transform var(--link-underline-duration)
-      var(--ease-link-underline);
+      var(--ease-interaction);
   }
 }
 
@@ -1656,7 +1633,7 @@ button.experience__meta--cta:focus-visible {
 .signup-form__button.text-reveal-underline--ready:has(.text-reveal)::before {
   transform: scaleX(1);
   transition: transform var(--link-underline-duration)
-    var(--ease-link-underline);
+    var(--ease-interaction);
 }
 
 /* Keep label ink — `.interactive` otherwise tints text on hover/focus */
@@ -1810,7 +1787,7 @@ button.experience__meta--cta:focus-visible {
     padding var(--duration-panel-enter) var(--ease-drawer),
     transform var(--duration-panel-enter) var(--ease-drawer),
     border-radius var(--duration-panel-enter) var(--ease-drawer),
-    box-shadow var(--duration-panel-enter) var(--ease-out-strong);
+    box-shadow var(--duration-panel-enter) var(--ease-interaction);
 }
 
 .landing-info-panel.is-open {
@@ -1836,8 +1813,8 @@ button.experience__meta--cta:focus-visible {
   color: var(--color-ink);
   cursor: pointer;
   transition:
-    transform var(--duration-interaction) var(--ease-out-strong),
-    opacity var(--duration-interaction) var(--ease-out-strong);
+    transform var(--duration-interaction) var(--ease-interaction),
+    opacity var(--duration-interaction) var(--ease-interaction);
 }
 
 .landing-info-panel__toggle-icon,
@@ -1865,8 +1842,8 @@ button.experience__meta--cta:focus-visible {
   width: 1px;
   height: 20px;
   transition:
-    opacity var(--duration-interaction) var(--ease-out-strong),
-    transform var(--duration-interaction) var(--ease-out-strong);
+    opacity var(--duration-interaction) var(--ease-interaction),
+    transform var(--duration-interaction) var(--ease-interaction);
 }
 
 .landing-info-panel.is-open .landing-info-panel__toggle-icon::after {
@@ -1884,8 +1861,8 @@ button.experience__meta--cta:focus-visible {
   pointer-events: none;
   transform: translateY(0.45rem);
   transition:
-    opacity var(--duration-panel-enter) var(--ease-out-strong),
-    transform var(--duration-panel-enter) var(--ease-out-strong);
+    opacity var(--duration-panel-enter) var(--ease-interaction),
+    transform var(--duration-panel-enter) var(--ease-interaction);
 }
 
 .landing-info-panel.is-open .landing-info-panel__body {
@@ -1982,14 +1959,14 @@ button.experience__meta--cta:focus-visible {
   }
 
   .experience__title {
-    line-height: 0.76;
+    line-height: 0.96;
   }
 
   .experience__title-overline {
-    right: -12px;
-    bottom: -0.95rem;
+    right: -1rem;
+    bottom: 0.65rem;
     font-size: clamp(0.56rem, 2.7vw, 0.72rem);
-    line-height: 1;
+    line-height: 1.2;
   }
 
   .experience__nav-row {
@@ -2034,9 +2011,7 @@ button.experience__meta--cta:focus-visible {
     grid-template-rows: minmax(13rem, 42svh) auto;
     gap: 0.85rem;
     height: 100svh;
-    padding:
-      max(0.75rem, env(safe-area-inset-top))
-      0.75rem
+    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem
       max(1.25rem, env(safe-area-inset-bottom));
     background: color-mix(
       in srgb,

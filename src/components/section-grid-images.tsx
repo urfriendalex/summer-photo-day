@@ -531,7 +531,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
               onClick={() => openImage(index)}
               aria-label="Увеличить фото"
             >
-              <img src={image} alt="" />
+              <img src={image} alt="" loading="lazy" decoding="async" />
             </button>
           </figure>
         ))}
@@ -574,6 +574,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
                   className="topic-detail__lightbox-image"
                   src={images[activeImageIndex]}
                   alt=""
+                  decoding="async"
                 />
               </div>
             </div>,

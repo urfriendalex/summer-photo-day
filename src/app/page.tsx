@@ -4,19 +4,19 @@ import { siteContent } from "@/lib/site-content";
 
 export default function Home() {
   const marqueeImages = getImagesFromPublicFolder("media/marquee");
+  const styleImages = getImagesFromPublicFolder("media/style");
   const topicImages = {
-    style: getImagesFromPublicFolder("media/mood"),
+    style: styleImages,
     photo: getImagesFromPublicFolder("media/photo"),
-    makeup: getImagesFromPublicFolder("media/mood"),
+    makeup: getImagesFromPublicFolder("media/makeup"),
   };
-  const picnicImages = getImagesFromPublicFolder("media/picnic");
 
   return (
     <SummerPhotoDayExperience
       content={siteContent}
       marqueeImages={marqueeImages}
       topicImages={topicImages}
-      picnicImages={picnicImages}
+      picnicImages={styleImages}
     />
   );
 }
