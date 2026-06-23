@@ -326,6 +326,10 @@ export function SummerPhotoDayExperience({
   }, [applyMode]);
 
   const toggleLandingInfo = useCallback(() => {
+    if (!window.matchMedia("(max-width: 720px)").matches) {
+      return;
+    }
+
     setIsPicnicFeatureOpen(false);
     setIsLandingInfoOpen((current) => !current);
   }, []);
@@ -442,16 +446,18 @@ export function SummerPhotoDayExperience({
     };
 
     const handlePointerDown = (event: PointerEvent) => {
+      if (!mobileLandingInfoMq.matches) {
+        setIsLandingInfoOpen(false);
+        return;
+      }
+
       const panel = landingInfoPanelRef.current;
       if (!panel || panel.contains(event.target as Node)) {
         return;
       }
 
-      if (mobileLandingInfoMq.matches) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
+      event.preventDefault();
+      event.stopPropagation();
       setIsLandingInfoOpen(false);
     };
 
@@ -1216,69 +1222,67 @@ export function SummerPhotoDayExperience({
             )}
           </section>
         </section>
+      </main>
 
-        <div className="landing-panel__cta sticky-register experience__register-cta">
-          <div className="experience__register-cta-stack">
-            {activeMode !== "signup" && content.signup.spotsLeftText.trim() ? (
-              <TextReveal
-                playOnce
-                as="span"
-                className="sticky-register__spots-hint"
-                text={content.signup.spotsLeftText}
-                blockDelay={Math.max(
-                  0,
-                  registerCtaRevealDelay - LINE_STAGGER_S,
-                )}
-              />
-            ) : null}
-            <div
-              className="experience__register-cta-button-wrap"
-              style={
-                {
-                  "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
-                } as CSSProperties
+      {activeMode !== "signup" && content.signup.spotsLeftText.trim() ? (
+        <TextReveal
+          playOnce
+          as="span"
+          className="sticky-register__spots-hint"
+          text={content.signup.spotsLeftText}
+          blockDelay={Math.max(0, registerCtaRevealDelay - LINE_STAGGER_S)}
+        />
+      ) : null}
+
+      <div className="landing-panel__cta sticky-register experience__register-cta">
+        <div className="experience__register-cta-stack">
+          <div
+            className="experience__register-cta-button-wrap"
+            style={
+              {
+                "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
+              } as CSSProperties
+            }
+          >
+            <button
+              className={`sticky-register__button landing-panel__register-button interactive${
+                activeMode === "signup" ? "" : " interactive--accent"
+              }`}
+              type="button"
+              onClick={
+                activeMode === "signup"
+                  ? () =>
+                      applyMode(modeBeforeSignupRef.current, {
+                        updateUrl: true,
+                      })
+                  : toggleRegisterMode
               }
             >
-              <button
-                className={`sticky-register__button landing-panel__register-button interactive${
-                  activeMode === "signup" ? "" : " interactive--accent"
-                }`}
-                type="button"
-                onClick={
+              {/* Keep register TextReveal mounted; hide on signup so Back does not replay the reveal or resize the label */}
+              <span
+                className={
                   activeMode === "signup"
-                    ? () =>
-                        applyMode(modeBeforeSignupRef.current, {
-                          updateUrl: true,
-                        })
-                    : toggleRegisterMode
+                    ? "experience__register-cta-layer experience__register-cta-layer--concealed"
+                    : "experience__register-cta-layer"
                 }
+                aria-hidden={activeMode === "signup"}
               >
-                {/* Keep register TextReveal mounted; hide on signup so Back does not replay the reveal or resize the label */}
-                <span
-                  className={
-                    activeMode === "signup"
-                      ? "experience__register-cta-layer experience__register-cta-layer--concealed"
-                      : "experience__register-cta-layer"
-                  }
-                  aria-hidden={activeMode === "signup"}
-                >
-                  <TextReveal
-                    playOnce
-                    as="span"
-                    text={content.registerLabel}
-                    blockDelay={registerCtaRevealDelay}
-                  />
+                <TextReveal
+                  playOnce
+                  as="span"
+                  text={content.registerLabel}
+                  blockDelay={registerCtaRevealDelay}
+                />
+              </span>
+              {activeMode === "signup" ? (
+                <span className="experience__register-cta-layer experience__register-cta-layer--back">
+                  Back
                 </span>
-                {activeMode === "signup" ? (
-                  <span className="experience__register-cta-layer experience__register-cta-layer--back">
-                    Back
-                  </span>
-                ) : null}
-              </button>
-            </div>
+              ) : null}
+            </button>
           </div>
         </div>
-      </main>
+      </div>
 
       {onLanding ? (
         <article

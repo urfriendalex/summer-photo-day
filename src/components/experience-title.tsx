@@ -335,7 +335,6 @@ function ExperienceTitleComponent({
           width: bleedFrame.width,
           textAlign: "left",
           boxSizing: "border-box",
-          zIndex: 10050,
           opacity: 1,
         });
 
