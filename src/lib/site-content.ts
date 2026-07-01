@@ -65,7 +65,7 @@ export const siteContent: SiteContent = {
   projectTitle: "Wild Grace",
   overlineLabel: "PHOTO DAY / PICNIC EXPERIENCE",
   location: "WARSAW",
-  date: "28.06.2026",
+  date: "05.07.2026",
   priceLabel: "1250 PLN",
   registerLabel: "ЗАРЕГИСТРИРОВАТЬСЯ",
   introText: [
@@ -76,11 +76,10 @@ export const siteContent: SiteContent = {
     "Стоимость участия — 1250 PLN. Количество мест ограничено камерным форматом события 🤍",
   ],
   infoLines: [
-    "PHOTO DAY BY",
+    "WILD GRACE PHOTO DAY | PICNIC EXPERIENCE BY",
     "@liza_karasiova",
     "@lina_tsapova",
     "@mateynastya",
-    "PHOTO DAY / PICNIC EXPERIENCE",
   ],
   picnicFeature: {
     eyebrow: "ТОЛЬКО В ЭТОМ ФОТОДНЕ",

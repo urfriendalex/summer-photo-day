@@ -21,12 +21,14 @@ import { TextReveal } from "@/components/text-reveal";
 import { estimateLineCount } from "@/lib/estimate-line-count";
 import { revealAfterLines } from "@/lib/reveal-hierarchy";
 import {
+  DURATION_TRANSFORM_S,
   EASE_TRANSFORM,
   GRID_IMAGE_INITIAL_BLUR_PX,
   GRID_IMAGE_INITIAL_SCALE,
   GRID_IMAGE_REVEAL_DURATION_S,
   GRID_REVEAL_TAIL_LINE_SLOTS,
   LANDING_INFO_PANEL_TEXT_REVEAL_LAG_S,
+  PICNIC_FEATURE_TEXT_REVEAL_LAG_S,
   LINE_STAGGER_S,
 } from "@/lib/reveal-motion";
 import type { SiteContent, TopicKey } from "@/lib/site-content";
@@ -188,6 +190,26 @@ export function SummerPhotoDayExperience({
     }
     return { introParagraphs, info };
   }, [content.introText, content.infoLines]);
+
+  const picnicFeatureReveal = useMemo(() => {
+    const lag = PICNIC_FEATURE_TEXT_REVEAL_LAG_S;
+    let c = 0;
+    const eyebrowDelay = lag + revealAfterLines(c);
+    c += estimateLineCount(content.picnicFeature.eyebrow);
+    const titleDelay = lag + revealAfterLines(c);
+    c += estimateLineCount(content.picnicFeature.title);
+    const description: { paragraph: string; blockDelay: number }[] = [];
+    for (const paragraph of content.picnicFeature.description) {
+      description.push({ paragraph, blockDelay: lag + revealAfterLines(c) });
+      c += estimateLineCount(paragraph);
+    }
+    const includes: { item: string; blockDelay: number }[] = [];
+    for (const item of content.picnicFeature.includes) {
+      includes.push({ item, blockDelay: lag + revealAfterLines(c) });
+      c += estimateLineCount(item);
+    }
+    return { eyebrowDelay, titleDelay, description, includes };
+  }, [content.picnicFeature]);
 
   const marqueeTrack = useMemo(() => {
     return marqueeImages.slice(0, 56);
@@ -1301,19 +1323,57 @@ export function SummerPhotoDayExperience({
             ) : null}
           </div>
           <div className="picnic-feature__content">
-            <p className="picnic-feature__eyebrow">
-              {content.picnicFeature.eyebrow}
-            </p>
-            <h2>{content.picnicFeature.title}</h2>
+            <TextReveal
+              as="p"
+              className="picnic-feature__eyebrow"
+              text={content.picnicFeature.eyebrow}
+              blockDelay={picnicFeatureReveal.eyebrowDelay}
+              playWhen={isPicnicFeatureOpen}
+            />
+            <TextReveal
+              as="h2"
+              text={content.picnicFeature.title}
+              blockDelay={picnicFeatureReveal.titleDelay}
+              playWhen={isPicnicFeatureOpen}
+            />
             <div className="picnic-feature__description">
-              {content.picnicFeature.description.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+              {picnicFeatureReveal.description.map(({ paragraph, blockDelay }, index) => (
+                <TextReveal
+                  key={`picnic-desc-${index}`}
+                  text={paragraph}
+                  blockDelay={blockDelay}
+                  playWhen={isPicnicFeatureOpen}
+                />
               ))}
             </div>
             <ul className="picnic-feature__includes">
-              {content.picnicFeature.includes.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {picnicFeatureReveal.includes.map(({ item, blockDelay }) => {
+                const lineCount = Math.max(1, estimateLineCount(item, 18));
+                const borderDelay =
+                  blockDelay +
+                  DURATION_TRANSFORM_S +
+                  LINE_STAGGER_S * Math.max(0, lineCount - 1) +
+                  0.035;
+
+                return (
+                  <li
+                    key={item}
+                    style={
+                      {
+                        "--picnic-include-border-delay": `${borderDelay}s`,
+                      } as CSSProperties
+                    }
+                  >
+                    <TextReveal
+                      as="span"
+                      className="picnic-feature__includes-item"
+                      text={item}
+                      blockDelay={blockDelay}
+                      playWhen={isPicnicFeatureOpen}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </article>

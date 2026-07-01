@@ -6,6 +6,11 @@
 
 const TOP_EPS = 1;
 
+/** Layout width for wrap probes — unaffected by ancestor CSS transforms (unlike getBoundingClientRect). */
+export function layoutWidthForMeasure(element: HTMLElement): number {
+  return element.offsetWidth;
+}
+
 /** Unify newlines; keep `\n` for `white-space: pre-line`. Trim outer whitespace only. */
 export function normalizeTextForMeasure(text: string): string {
   return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
@@ -88,7 +93,7 @@ export function measureVisualLines(text: string, element: HTMLElement): string[]
     visibility: "hidden",
     pointerEvents: "none",
     zIndex: "-1",
-    width: `${element.getBoundingClientRect().width}px`,
+    width: `${layoutWidthForMeasure(element)}px`,
   });
   applyProbeTypography(probe, cs);
   if (element.lang) {

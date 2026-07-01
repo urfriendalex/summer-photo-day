@@ -297,8 +297,11 @@ input {
   width: 100%;
   max-width: 100%;
   overflow: visible;
-  padding-left: clamp(6px, 0.9vw, 12px);
-  padding-right: clamp(2px, 0.25vw, 4px);
+  /* Script swashes (leading “w”, trailing “e”) overshoot the text advance box;
+     reserve symmetric side room so they aren’t clipped at the viewport edge during
+     the centered intro. Read by applyFit() so the font auto-fits within it. */
+  padding-left: clamp(20px, 6vw, 40px);
+  padding-right: clamp(20px, 6vw, 40px);
   border: 0;
   margin: 0;
   background: transparent;
@@ -449,6 +452,12 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   display: inline-block;
   white-space: nowrap;
   text-align: inherit;
+  /* line-height 0.5 makes the box shorter than the glyphs, so the intro blur’s
+     render buffer (sized to the box) slices ascenders (l, d) and the “g” descender.
+     Pad the box to enclose the ink; equal negative margin cancels the layout growth
+     so the final header stays as tight as designed. */
+  padding-block: 0.5em;
+  margin-block: -0.5em;
 }
 
 /* Preloader intro — blur/scale must not be clipped by ancestor overflow (Safari). */
@@ -708,6 +717,7 @@ button.experience__meta--cta:focus-visible {
   inset: 0;
   z-index: 10320;
   display: grid;
+  min-height: 0;
   grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
   gap: clamp(1.25rem, 3vw, 3.5rem);
   padding: clamp(1rem, 2.5vw, 2.5rem);
@@ -749,57 +759,14 @@ button.experience__meta--cta:focus-visible {
   background: var(--color-peach);
 }
 
-.picnic-feature__image,
-.picnic-feature__eyebrow,
-.picnic-feature h2,
-.picnic-feature__description p,
-.picnic-feature__includes li {
+.picnic-feature__image {
   opacity: 0;
   transform: translateY(0.75rem);
 }
 
-.picnic-feature.is-open .picnic-feature__image,
-.picnic-feature.is-open .picnic-feature__eyebrow,
-.picnic-feature.is-open h2,
-.picnic-feature.is-open .picnic-feature__description p,
-.picnic-feature.is-open .picnic-feature__includes li {
-  animation: picnic-feature-content-in 420ms var(--ease-interaction) forwards;
-}
-
 .picnic-feature.is-open .picnic-feature__image {
+  animation: picnic-feature-content-in 420ms var(--ease-interaction) forwards;
   animation-delay: 390ms;
-}
-
-.picnic-feature.is-open .picnic-feature__eyebrow {
-  animation-delay: 470ms;
-}
-
-.picnic-feature.is-open h2 {
-  animation-delay: 550ms;
-}
-
-.picnic-feature.is-open .picnic-feature__description p:nth-child(1) {
-  animation-delay: 630ms;
-}
-
-.picnic-feature.is-open .picnic-feature__description p:nth-child(2) {
-  animation-delay: 710ms;
-}
-
-.picnic-feature.is-open .picnic-feature__includes li:nth-child(1) {
-  animation-delay: 790ms;
-}
-
-.picnic-feature.is-open .picnic-feature__includes li:nth-child(2) {
-  animation-delay: 850ms;
-}
-
-.picnic-feature.is-open .picnic-feature__includes li:nth-child(3) {
-  animation-delay: 910ms;
-}
-
-.picnic-feature.is-open .picnic-feature__includes li:nth-child(4) {
-  animation-delay: 970ms;
 }
 
 @keyframes picnic-feature-content-in {
@@ -819,14 +786,23 @@ button.experience__meta--cta:focus-visible {
 .picnic-feature__content {
   display: flex;
   min-width: 0;
+  min-height: 0;
+  max-height: 100%;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  overflow-y: auto;
+  padding-block: clamp(0.75rem, 3vh, 2rem);
+  scrollbar-width: none;
+}
+
+.picnic-feature__content::-webkit-scrollbar {
+  display: none;
 }
 
 .picnic-feature__eyebrow,
-.picnic-feature h2,
-.picnic-feature__description p {
+.picnic-feature h2.text-reveal,
+.picnic-feature__description .text-reveal {
   margin: 0;
 }
 
@@ -838,6 +814,7 @@ button.experience__meta--cta:focus-visible {
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 .picnic-feature h2 {
@@ -859,6 +836,15 @@ button.experience__meta--cta:focus-visible {
   line-height: 1.35;
 }
 
+.picnic-feature__description .text-reveal {
+  width: 100%;
+  max-width: none;
+}
+
+.picnic-feature__description .text-reveal__line {
+  text-wrap: pretty;
+}
+
 .picnic-feature__includes {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -873,8 +859,27 @@ button.experience__meta--cta:focus-visible {
 }
 
 .picnic-feature__includes li {
+  min-width: 0;
   padding-top: 0.55rem;
-  border-top: 1px solid color-mix(in srgb, var(--color-ink) 34%, transparent);
+  border-top: 1px solid transparent;
+}
+
+.picnic-feature.is-open .picnic-feature__includes li {
+  animation: picnic-feature-include-border-in 160ms var(--ease-interaction)
+    forwards;
+  animation-delay: var(--picnic-include-border-delay, 0s);
+}
+
+@keyframes picnic-feature-include-border-in {
+  to {
+    border-top-color: color-mix(in srgb, var(--color-ink) 34%, transparent);
+  }
+}
+
+.picnic-feature__includes-item {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 .picnic-feature-toggle {
@@ -2081,7 +2086,7 @@ button.experience__meta--cta:focus-visible {
 
   .picnic-feature {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(13rem, 42svh) auto;
+    grid-template-rows: minmax(10rem, 38svh) minmax(0, 1fr);
     gap: 0.85rem;
     height: 100svh;
     padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem
@@ -2093,12 +2098,22 @@ button.experience__meta--cta:focus-visible {
     );
     -webkit-backdrop-filter: blur(30px) saturate(0.82);
     backdrop-filter: blur(30px) saturate(0.82);
-    overflow-y: auto;
+    overflow: hidden;
     overscroll-behavior: contain;
+  }
+
+  .picnic-feature.is-open {
+    z-index: 10340;
+  }
+
+  /* Expanded footer sheet covers the picnic chip; picnic open state stacks above all. */
+  .landing-info-panel.is-open {
+    z-index: 10335;
   }
 
   .picnic-feature__content {
     justify-content: flex-start;
+    padding-block: 0 calc(var(--landing-frost-chip-height) + 1.25rem);
   }
 
   .picnic-feature h2 {
@@ -2133,7 +2148,7 @@ button.experience__meta--cta:focus-visible {
     right: auto;
     bottom: var(--landing-floating-bottom);
     left: max(0.875rem, env(safe-area-inset-left));
-    z-index: 10330;
+    z-index: 10350;
     background: var(--color-pastel-yellow);
   }
 
@@ -2149,6 +2164,27 @@ button.experience__meta--cta:focus-visible {
   .picnic-feature-toggle__icon {
     display: block;
     line-height: 1;
+  }
+
+  .picnic-feature-toggle.is-open .picnic-feature-toggle__icon {
+    display: grid;
+    position: relative;
+    width: 28px;
+    height: 20px;
+    place-items: center;
+    font-size: 0;
+    line-height: 0;
+  }
+
+  .picnic-feature-toggle.is-open .picnic-feature-toggle__icon::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 21px;
+    height: 1px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
   }
 
   .marquee__track {
