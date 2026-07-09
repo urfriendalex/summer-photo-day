@@ -72,9 +72,9 @@ function fitTitleFontSize(
   targetWidthPx: number,
 ): number {
   let lo = 6;
-  // Ultra-wide displays need a title size above the old 720px ceiling to retain
-  // the edge-to-edge wordmark. The target width is a safe upper bound in pixels.
-  let hi = Math.max(720, targetWidthPx);
+  // Cap the font's vertical size like the Blooming Diva reference. Ultra-wide
+  // layouts fill the remaining width with a separate horizontal scale.
+  let hi = 720;
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     titleRoot.style.fontSize = `${mid}px`;
