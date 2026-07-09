@@ -65,7 +65,7 @@ export const siteContent: SiteContent = {
   projectTitle: "Wild Grace",
   overlineLabel: "PHOTO DAY / PICNIC EXPERIENCE",
   location: "WARSAW",
-  date: "05.07.2026",
+  date: "",
   priceLabel: "1250 PLN",
   registerLabel: "ЗАРЕГИСТРИРОВАТЬСЯ",
   introText: [

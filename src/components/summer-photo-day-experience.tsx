@@ -120,7 +120,9 @@ export function SummerPhotoDayExperience({
     const locationDelay = revealAfterLines(c);
     c += estimateLineCount(content.location);
     const dateDelay = revealAfterLines(c);
-    c += estimateLineCount(content.date);
+    if (content.date) {
+      c += estimateLineCount(content.date);
+    }
     const priceDelay = revealAfterLines(c);
     return { locationDelay, dateDelay, priceDelay };
   }, [content.location, content.date]);
@@ -1084,7 +1086,13 @@ export function SummerPhotoDayExperience({
                 aria-label={
                   activeMode === "signup"
                     ? "Перейти к форме заявки"
-                    : `${content.registerLabel}: ${content.location}, ${content.date}, ${content.priceLabel}`
+                    : `${content.registerLabel}: ${[
+                        content.location,
+                        content.date,
+                        content.priceLabel,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}`
                 }
               >
                 <TextReveal
@@ -1093,12 +1101,14 @@ export function SummerPhotoDayExperience({
                   text={content.location}
                   blockDelay={headerMetaReveal.locationDelay}
                 />
-                <TextReveal
-                  as="span"
-                  className="experience__meta-item"
-                  text={content.date}
-                  blockDelay={headerMetaReveal.dateDelay}
-                />
+                {content.date ? (
+                  <TextReveal
+                    as="span"
+                    className="experience__meta-item"
+                    text={content.date}
+                    blockDelay={headerMetaReveal.dateDelay}
+                  />
+                ) : null}
                 <TextReveal
                   as="span"
                   className="experience__meta-item"

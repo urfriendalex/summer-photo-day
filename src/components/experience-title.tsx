@@ -2,7 +2,6 @@
 
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
-import { flushSync } from "react-dom";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(Flip);
@@ -11,20 +10,18 @@ const TITLE_INTRO_FROM = {
   opacity: 0,
   scale: 0.94,
   z: -28,
-  filter: "blur(10px)",
   transformOrigin: "50% 50%",
   force3D: true,
 } as const;
 
 const OVERLINE_INTRO_FROM = {
   opacity: 0,
-  filter: "blur(4px)",
   force3D: true,
 } as const;
 
 const INTRO_BEAT_GAP = 0.07;
 
-/** Stagger opacity/blur ahead of depth so the reveal eases in rather than popping. */
+/** Stagger opacity ahead of depth without filter surfaces that clip script swashes. */
 function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     gsap
@@ -33,11 +30,6 @@ function animateTitleIntro(track: HTMLElement): Promise<void> {
         onComplete: resolve,
       })
       .to(track, { opacity: 1, duration: 0.52, ease: "power2.out" }, 0)
-      .to(
-        track,
-        { filter: "blur(0px)", duration: 0.74, ease: "power2.out" },
-        0.04,
-      )
       .to(track, { scale: 1, z: 0, duration: 0.9, ease: "power3.out" }, 0);
   });
 }
@@ -46,12 +38,7 @@ function animateOverlineIntro(overline: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     gsap
       .timeline({ defaults: { force3D: true }, onComplete: resolve })
-      .to(overline, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0)
-      .to(
-        overline,
-        { filter: "blur(0px)", duration: 0.52, ease: "power2.out" },
-        0.03,
-      );
+      .to(overline, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0);
   });
 }
 
@@ -85,7 +72,9 @@ function fitTitleFontSize(
   targetWidthPx: number,
 ): number {
   let lo = 6;
-  let hi = 720;
+  // Ultra-wide displays need a title size above the old 720px ceiling to retain
+  // the edge-to-edge wordmark. The target width is a safe upper bound in pixels.
+  let hi = Math.max(720, targetWidthPx);
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     titleRoot.style.fontSize = `${mid}px`;
@@ -302,29 +291,23 @@ function ExperienceTitleComponent({
         if (cancelled) {
           return;
         }
-        await new Promise<void>((r) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => r())),
-        );
-        if (cancelled) {
-          return;
-        }
-
         bleed.classList.add("experience__title-bleed--preloader-slot");
 
         /* Depth reveal: scale + blur toward camera (center origin), no xy translate. */
         if (reduceMotion) {
           gsap.set(clip, { clearProps: "perspective" });
-          gsap.set(track, { opacity: 1, scale: 1, z: 0, filter: "blur(0px)" });
-          gsap.set(overline, { opacity: 1, filter: "blur(0px)" });
+          gsap.set(track, { opacity: 1, scale: 1, z: 0 });
+          gsap.set(overline, { opacity: 1 });
         } else {
           gsap.set(clip, { perspective: 1100 });
           gsap.set(track, TITLE_INTRO_FROM);
           gsap.set(overline, OVERLINE_INTRO_FROM);
         }
 
-        flushSync(() => {
-          setIntroSurface(true);
-        });
+        // This runs inside a layout effect. Queue the cosmetic class update rather
+        // than forcing a nested React commit; the inline GSAP state below makes the
+        // title visible for the current frame.
+        scheduleIntroSurface(true);
 
         const bleedFrame = getBleedFrame(bleed);
         gsap.set(titleRoot, {
@@ -336,6 +319,7 @@ function ExperienceTitleComponent({
           textAlign: "left",
           boxSizing: "border-box",
           opacity: 1,
+          zIndex: 10048,
         });
 
         if (cancelled) {
@@ -344,8 +328,7 @@ function ExperienceTitleComponent({
 
         if (!reduceMotion) {
           await animateIntroSequence(track, overline);
-          gsap.set(track, { clearProps: "transform,filter,transformOrigin" });
-          gsap.set(overline, { clearProps: "filter" });
+          gsap.set(track, { clearProps: "transform,transformOrigin" });
           gsap.set(clip, { clearProps: "perspective" });
         }
         if (cancelled) {

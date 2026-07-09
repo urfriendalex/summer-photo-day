@@ -300,8 +300,8 @@ input {
   /* Script swashes (leading “w”, trailing “e”) overshoot the text advance box;
      reserve symmetric side room so they aren’t clipped at the viewport edge during
      the centered intro. Read by applyFit() so the font auto-fits within it. */
-  padding-left: clamp(20px, 6vw, 40px);
-  padding-right: clamp(20px, 6vw, 40px);
+  padding-left: clamp(14px, 1.25vw, 48px);
+  padding-right: clamp(14px, 1.25vw, 48px);
   border: 0;
   margin: 0;
   background: transparent;
@@ -444,20 +444,21 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   vertical-align: top;
   line-height: inherit;
   overflow: visible;
-  /* Script descenders extend past the line box — pad so glyphs aren't sliced after Flip. */
-  padding-block: 0.1em;
+  /* Blooming Elegant's ascenders paint well above its 0.5 line box. Move the ink
+     into the viewport without reducing the fitted width; overflow remains visible
+     for the long “g” descender. */
+  position: relative;
+  top: 0.35em;
 }
 
 .experience__title-reveal-track {
   display: inline-block;
   white-space: nowrap;
   text-align: inherit;
-  /* line-height 0.5 makes the box shorter than the glyphs, so the intro blur’s
-     render buffer (sized to the box) slices ascenders (l, d) and the “g” descender.
-     Pad the box to enclose the ink; equal negative margin cancels the layout growth
-     so the final header stays as tight as designed. */
-  padding-block: 0.5em;
-  margin-block: -0.5em;
+  /* The clip owns the vertical ink allowance; keep the animated track unpadded so
+     transforms use the true text bounds and remain smooth at very large sizes. */
+  padding-block: 0;
+  margin-block: 0;
 }
 
 /* Preloader intro — blur/scale must not be clipped by ancestor overflow (Safari). */
@@ -469,7 +470,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 
 .experience__title--intro-surface .experience__title-reveal-track,
 .experience__title--intro-surface .experience__title-overline {
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 
 .experience__title-bleed--preloader-slot {
