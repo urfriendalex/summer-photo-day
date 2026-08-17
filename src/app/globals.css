@@ -298,9 +298,9 @@ input {
   max-width: 100%;
   overflow: visible;
   /* Script swashes (leading “w”, trailing “e”) overshoot the text advance box;
-     reserve symmetric side room so they aren’t clipped at the viewport edge during
-     the centered intro. Read by applyFit() so the font auto-fits within it. */
-  padding-left: clamp(14px, 1.25vw, 48px);
+     reserve asymmetric side room so they aren’t clipped at the viewport edge.
+     Read by applyFit() so the font auto-fits within it. */
+  padding-left: clamp(20px, 2vw, 72px);
   padding-right: clamp(14px, 1.25vw, 48px);
   border: 0;
   margin: 0;
@@ -337,10 +337,9 @@ input {
   z-index: 10045;
 }
 
-/* Don’t lift the whole header above main — title/nav z-index below compete with images inside shell. */
 .experience--preloader .experience__header {
   position: relative;
-  z-index: auto;
+  z-index: 10055;
 }
 
 .experience--preloader .experience__title-bleed {
@@ -444,21 +443,18 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   vertical-align: top;
   line-height: inherit;
   overflow: visible;
-  /* Blooming Elegant's ascenders paint well above its 0.5 line box. Move the ink
-     into the viewport without reducing the fitted width; overflow remains visible
-     for the long “g” descender. */
-  position: relative;
-  top: 0.35em;
+  /* Script descenders extend past the line box — pad so glyphs aren't sliced after Flip. */
+  padding-block: 0.1em;
 }
 
 .experience__title-reveal-track {
   display: inline-block;
   white-space: nowrap;
   text-align: inherit;
-  /* The clip owns the vertical ink allowance; keep the animated track unpadded so
-     transforms use the true text bounds and remain smooth at very large sizes. */
-  padding-block: 0;
-  margin-block: 0;
+  /* line-height 0.5 makes the box shorter than the glyphs, so pad the box to enclose
+     the ink; equal negative margin cancels the layout growth so the masthead stays tight. */
+  padding-block: 0.5em;
+  margin-block: -0.5em;
 }
 
 /*
@@ -470,19 +466,12 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 @media (min-width: 1600px) and (min-aspect-ratio: 16 / 9) {
   .experience__title-bleed {
     height: clamp(19rem, 20vw, 28rem);
+    display: flex;
+    align-items: flex-end;
   }
 
   .experience__title {
-    height: 100%;
-  }
-
-  .experience__title-reveal-clip {
-    top: 0.1em;
-  }
-
-  .experience__title-reveal-track {
-    transform: scaleY(0.66);
-    transform-origin: 50% 12%;
+    height: auto;
   }
 
   .experience__title-overline {

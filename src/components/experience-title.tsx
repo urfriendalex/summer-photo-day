@@ -2,9 +2,14 @@
 
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
+import { flushSync } from "react-dom";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(Flip);
+
+const WIDE_MASTHEAD_QUERY = "(min-width: 1600px) and (min-aspect-ratio: 16 / 9)";
+const WIDE_OPTICAL_SCALE_Y = 0.66;
+const WIDE_OPTICAL_ORIGIN = "50% 12%";
 
 const TITLE_INTRO_FROM = {
   opacity: 0,
@@ -70,11 +75,12 @@ function fitTitleFontSize(
   titleRoot: HTMLElement,
   track: HTMLElement,
   targetWidthPx: number,
+  maxPx = 720,
 ): number {
   let lo = 6;
   // Cap the font's vertical size like the Blooming Diva reference. Ultra-wide
-  // layouts fill the remaining width with a separate horizontal scale.
-  let hi = 720;
+  // layouts compress optical height on the reveal clip.
+  let hi = maxPx;
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     titleRoot.style.fontSize = `${mid}px`;
@@ -140,6 +146,58 @@ function getTitleFitWidth(bleed: HTMLElement, paddingX: number): number {
   return Math.max(32, (effectiveWidth - paddingX) * 0.998);
 }
 
+function isWideMastheadViewport(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia(WIDE_MASTHEAD_QUERY).matches
+  );
+}
+
+/** Keep optical scaling on the clip so GSAP can animate the inner track freely. */
+function applyWideOpticalScale(clip: HTMLElement): void {
+  if (!isWideMastheadViewport()) {
+    clip.style.transform = "";
+    clip.style.transformOrigin = "";
+    return;
+  }
+
+  clip.style.transformOrigin = WIDE_OPTICAL_ORIGIN;
+  clip.style.transform = `scaleY(${WIDE_OPTICAL_SCALE_Y})`;
+}
+
+function getFontSizeCeiling(bleed: HTMLElement): number {
+  if (!isWideMastheadViewport()) {
+    return 720;
+  }
+
+  const bleedHeight = bleed.clientHeight;
+  if (bleedHeight <= 0) {
+    return 720;
+  }
+
+  // Keep the ink inside the bounded masthead once optical scaleY is applied.
+  const opticalCeiling = Math.floor((bleedHeight / WIDE_OPTICAL_SCALE_Y) * 0.72);
+  return Math.min(720, Math.max(180, opticalCeiling));
+}
+
+function fitTitleWithinBleed(
+  bleed: HTMLElement,
+  titleRoot: HTMLElement,
+  track: HTMLElement,
+  clip: HTMLElement,
+  targetWidthPx: number,
+  deferWideOptical = false,
+): void {
+  const ceiling = getFontSizeCeiling(bleed);
+  fitTitleFontSize(titleRoot, track, targetWidthPx, ceiling);
+  if (deferWideOptical) {
+    clip.style.transform = "";
+    clip.style.transformOrigin = "";
+    return;
+  }
+  applyWideOpticalScale(clip);
+}
+
 function ExperienceTitleComponent({
   label,
   overlineLabel,
@@ -151,6 +209,8 @@ function ExperienceTitleComponent({
   const titleRef = useRef<HTMLDivElement>(null);
   const introStartedRef = useRef(false);
   const introFinishedRef = useRef(false);
+  /** Suppress wide-screen scaleY while the depth reveal runs; GSAP owns the track transform. */
+  const deferOpticalDuringIntroRef = useRef(false);
   /** Declarative “surface visible” so CSS opacity survives parent re-renders during the intro. */
   const [introSurface, setIntroSurface] = useState(false);
   const scheduleIntroSurface = useCallback((visible: boolean) => {
@@ -159,13 +219,16 @@ function ExperienceTitleComponent({
     });
   }, []);
 
-  const applyFit = useCallback(() => {
+  const applyFit = useCallback((options?: { deferWideOptical?: boolean }) => {
     const bleed = bleedRef.current;
     const titleRoot = titleRef.current;
     const track = titleRoot?.querySelector<HTMLElement>(
       ".experience__title-reveal-track",
     );
-    if (!bleed || !titleRoot || !track) {
+    const clip = titleRoot?.querySelector<HTMLElement>(
+      ".experience__title-reveal-clip",
+    );
+    if (!bleed || !titleRoot || !track || !clip) {
       return;
     }
     const styles = window.getComputedStyle(titleRoot);
@@ -176,7 +239,16 @@ function ExperienceTitleComponent({
     if (target < 32) {
       return;
     }
-    fitTitleFontSize(titleRoot, track, target);
+    const deferWideOptical =
+      options?.deferWideOptical ?? deferOpticalDuringIntroRef.current;
+    fitTitleWithinBleed(
+      bleed,
+      titleRoot,
+      track,
+      clip,
+      target,
+      deferWideOptical,
+    );
   }, []);
 
   const handleKeyDown = useCallback(
@@ -207,16 +279,17 @@ function ExperienceTitleComponent({
     if (!bleed) {
       return;
     }
-    const ro = new ResizeObserver(() => {
-      requestAnimationFrame(applyFit);
-    });
+    const scheduleFit = () => {
+      requestAnimationFrame(() => applyFit());
+    };
+    const ro = new ResizeObserver(scheduleFit);
     ro.observe(bleed);
-    window.addEventListener("orientationchange", applyFit);
-    window.visualViewport?.addEventListener("resize", applyFit);
+    window.addEventListener("orientationchange", scheduleFit);
+    window.visualViewport?.addEventListener("resize", scheduleFit);
     return () => {
       ro.disconnect();
-      window.removeEventListener("orientationchange", applyFit);
-      window.visualViewport?.removeEventListener("resize", applyFit);
+      window.removeEventListener("orientationchange", scheduleFit);
+      window.visualViewport?.removeEventListener("resize", scheduleFit);
     };
   }, [applyFit]);
 
@@ -252,6 +325,7 @@ function ExperienceTitleComponent({
       }
       introStartedRef.current = false;
       introFinishedRef.current = false;
+      deferOpticalDuringIntroRef.current = false;
       return;
     }
     if (introStartedRef.current) {
@@ -279,6 +353,7 @@ function ExperienceTitleComponent({
     gsap.set(titleRoot, { opacity: 0 });
 
     introStartedRef.current = true;
+    deferOpticalDuringIntroRef.current = true;
     let cancelled = false;
 
     const ctx = gsap.context(() => {
@@ -287,13 +362,20 @@ function ExperienceTitleComponent({
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const runIntro = async () => {
-        applyFit();
+        applyFit({ deferWideOptical: true });
         if (cancelled) {
           return;
         }
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        );
+        if (cancelled) {
+          return;
+        }
+
         bleed.classList.add("experience__title-bleed--preloader-slot");
 
-        /* Depth reveal: scale + blur toward camera (center origin), no xy translate. */
+        /* Depth reveal: scale toward camera (center origin), no xy translate. */
         if (reduceMotion) {
           gsap.set(clip, { clearProps: "perspective" });
           gsap.set(track, { opacity: 1, scale: 1, z: 0 });
@@ -304,10 +386,9 @@ function ExperienceTitleComponent({
           gsap.set(overline, OVERLINE_INTRO_FROM);
         }
 
-        // This runs inside a layout effect. Queue the cosmetic class update rather
-        // than forcing a nested React commit; the inline GSAP state below makes the
-        // title visible for the current frame.
-        scheduleIntroSurface(true);
+        flushSync(() => {
+          setIntroSurface(true);
+        });
 
         const bleedFrame = getBleedFrame(bleed);
         gsap.set(titleRoot, {
@@ -319,7 +400,7 @@ function ExperienceTitleComponent({
           textAlign: "left",
           boxSizing: "border-box",
           opacity: 1,
-          zIndex: 10048,
+          zIndex: 10050,
         });
 
         if (cancelled) {
@@ -336,6 +417,12 @@ function ExperienceTitleComponent({
         }
 
         await waitForWindowLoad();
+        if (cancelled) {
+          return;
+        }
+
+        deferOpticalDuringIntroRef.current = false;
+        applyFit();
         if (cancelled) {
           return;
         }
@@ -363,6 +450,7 @@ function ExperienceTitleComponent({
           simple: true,
           onComplete: () => {
             introFinishedRef.current = true;
+            deferOpticalDuringIntroRef.current = false;
             gsap.set(titleRoot, {
               clearProps:
                 "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
@@ -384,6 +472,7 @@ function ExperienceTitleComponent({
         ctx.revert();
       }
       introStartedRef.current = false;
+      deferOpticalDuringIntroRef.current = false;
     };
   }, [preloader, applyFit, onPreloaderComplete, scheduleIntroSurface]);
 
