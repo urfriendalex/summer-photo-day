@@ -287,7 +287,7 @@ input {
   /* Body already clips horizontal overflow; keep bleed overflow visible so script
      descenders (e.g. “g”) aren’t cut once preloader-intro clears overflow overrides. */
   overflow: visible;
-  z-index: 30;
+  z-index: 1;
 }
 
 .experience__title {
@@ -462,7 +462,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
  */
 @media (min-width: 900px) {
   .experience__title-bleed {
-    height: clamp(24rem, 60vh, 31rem);
+    height: clamp(18rem, 43vh, 24rem);
   }
 
   .experience__title {
@@ -474,7 +474,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   }
 
   .experience__title-overline {
-    bottom: 1.75rem;
+    bottom: 0.55rem;
   }
 }
 
@@ -508,7 +508,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   width: 100%;
   min-width: 0;
   position: relative;
-  z-index: 31;
+  z-index: 32;
   padding-block: 0.35rem;
 }
 
@@ -658,6 +658,8 @@ button.experience__meta--cta:focus-visible {
 }
 
 .experience__main {
+  position: relative;
+  z-index: 2;
   min-height: calc(100vh - 21rem);
 }
 
