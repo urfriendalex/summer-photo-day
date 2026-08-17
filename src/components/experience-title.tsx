@@ -1,7 +1,10 @@
 "use client";
 
 import { gsap } from "gsap";
+import { Flip } from "gsap/Flip";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
+
+gsap.registerPlugin(Flip);
 
 const TITLE_INTRO_FROM = {
   opacity: 0,
@@ -52,9 +55,9 @@ type ExperienceTitleProps = {
   label: string;
   overlineLabel: string;
   onClick: () => void;
-  /** When true, run the intro in the final masthead position. */
+  /** When true, run the intro: centered reveal, then Flip to header after window load. */
   preloader?: boolean;
-  /** Fired once the masthead intro finishes. */
+  /** Fired once the Flip-to-header animation finishes. */
   onPreloaderComplete?: () => void;
 };
 
@@ -89,6 +92,33 @@ function fitTitleFontSize(
     titleRoot.style.fontSize = `${px}px`;
   }
   return px;
+}
+
+function waitForWindowLoad(): Promise<void> {
+  if (typeof document === "undefined" || document.readyState === "complete") {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    window.addEventListener("load", () => resolve(), { once: true });
+  });
+}
+
+/** Match header bleed geometry so intro doesn’t re-center text (avoids a left jump on Flip). */
+function getBleedFrame(bleed: HTMLElement) {
+  const rect = bleed.getBoundingClientRect();
+  const layoutWidth =
+    typeof document !== "undefined"
+      ? document.documentElement.clientWidth
+      : rect.width;
+  const viewportWidth =
+    typeof window !== "undefined"
+      ? (window.visualViewport?.width ?? layoutWidth)
+      : rect.width;
+
+  return {
+    left: Math.max(0, rect.left),
+    width: Math.min(rect.width, layoutWidth, viewportWidth),
+  };
 }
 
 function getTitleFitWidth(bleed: HTMLElement, paddingX: number): number {
@@ -269,11 +299,9 @@ function ExperienceTitleComponent({
           return;
         }
 
-        /*
-         * Blooming-style intro: reveal the wordmark exactly where it will live.
-         * The old centered fixed surface + Flip travel fights the reserved
-         * masthead and reads as an incorrect layout jump.
-         */
+        bleed.classList.add("experience__title-bleed--preloader-slot");
+
+        /* Depth reveal: scale toward camera (center origin), no xy translate. */
         if (reduceMotion) {
           gsap.set(clip, { clearProps: "perspective" });
           gsap.set(track, { opacity: 1, scale: 1, z: 0 });
@@ -287,11 +315,18 @@ function ExperienceTitleComponent({
         // Queue React state instead of forcing a nested commit from a layout
         // effect; inline GSAP opacity/z-index make the current frame visible.
         scheduleIntroSurface(true);
+
+        const bleedFrame = getBleedFrame(bleed);
         gsap.set(titleRoot, {
+          position: "fixed",
+          left: bleedFrame.left,
+          top: "50%",
+          yPercent: -50,
+          width: bleedFrame.width,
+          textAlign: "left",
+          boxSizing: "border-box",
           opacity: 1,
-          position: "relative",
-          clearProps:
-            "left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+          zIndex: 10050,
         });
 
         if (cancelled) {
@@ -307,17 +342,49 @@ function ExperienceTitleComponent({
           return;
         }
 
+        await waitForWindowLoad();
+        if (cancelled) {
+          return;
+        }
+
         applyFit();
         if (cancelled) {
           return;
         }
 
-        introFinishedRef.current = true;
-        gsap.set(titleRoot, { clearProps: "transform,x,y,xPercent,yPercent" });
+        const bleedFrameBeforeFlip = getBleedFrame(bleed);
+        gsap.set(titleRoot, {
+          left: bleedFrameBeforeFlip.left,
+          width: bleedFrameBeforeFlip.width,
+        });
+
+        /** Record fixed intro layout, then snap to natural header in the DOM; Flip animates into place. */
+        const state = Flip.getState(titleRoot);
+
+        bleed.classList.remove("experience__title-bleed--preloader-slot");
+        gsap.set(titleRoot, {
+          clearProps:
+            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+        });
         gsap.set(titleRoot, { opacity: 1 });
-        gsap.set(track, { clearProps: "opacity,transform,filter" });
-        gsap.set(overline, { clearProps: "opacity,filter" });
-        onPreloaderComplete?.();
+
+        Flip.from(state, {
+          duration: reduceMotion ? 0.05 : 0.75,
+          ease: "power3.inOut",
+          absolute: true,
+          simple: true,
+          onComplete: () => {
+            introFinishedRef.current = true;
+            gsap.set(titleRoot, {
+              clearProps:
+                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
+            });
+            gsap.set(titleRoot, { opacity: 1 });
+            gsap.set(track, { clearProps: "opacity,transform,filter" });
+            gsap.set(overline, { clearProps: "opacity,filter" });
+            onPreloaderComplete?.();
+          },
+        });
       };
 
       void runIntro();
