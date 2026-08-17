@@ -323,6 +323,7 @@ function ExperienceTitleComponent({
           top: "50%",
           yPercent: -50,
           width: bleedFrame.width,
+          height: "auto",
           textAlign: "left",
           boxSizing: "border-box",
           opacity: 1,
@@ -364,7 +365,7 @@ function ExperienceTitleComponent({
         bleed.classList.remove("experience__title-bleed--preloader-slot");
         gsap.set(titleRoot, {
           clearProps:
-            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+            "position,left,top,width,height,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
         });
         gsap.set(titleRoot, { opacity: 1 });
 
@@ -377,7 +378,7 @@ function ExperienceTitleComponent({
             introFinishedRef.current = true;
             gsap.set(titleRoot, {
               clearProps:
-                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
+                "transform,x,y,xPercent,yPercent,left,top,width,height,textAlign",
             });
             gsap.set(titleRoot, { opacity: 1 });
             gsap.set(track, { clearProps: "opacity,transform,filter" });
