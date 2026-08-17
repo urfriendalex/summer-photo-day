@@ -298,10 +298,10 @@ input {
   max-width: 100%;
   overflow: visible;
   /* Script swashes (leading “w”, trailing “e”) overshoot the text advance box;
-     reserve asymmetric side room so they aren’t clipped at the viewport edge.
-     Read by applyFit() so the font auto-fits within it. */
-  padding-left: clamp(20px, 2vw, 72px);
-  padding-right: clamp(14px, 1.25vw, 48px);
+     reserve side room so they aren’t clipped at the viewport edge. Read by
+     applyFit() so the font auto-fits within it. */
+  padding-left: clamp(18px, 1.6vw, 64px);
+  padding-right: clamp(18px, 1.6vw, 64px);
   border: 0;
   margin: 0;
   background: transparent;
@@ -339,7 +339,7 @@ input {
 
 .experience--preloader .experience__header {
   position: relative;
-  z-index: 10055;
+  z-index: auto;
 }
 
 .experience--preloader .experience__title-bleed {
@@ -438,23 +438,21 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 }
 
 .experience__title-reveal-clip {
+  position: relative;
+  top: 0.34em;
   display: inline-block;
   max-width: 100%;
   vertical-align: top;
   line-height: inherit;
   overflow: visible;
-  /* Script descenders extend past the line box — pad so glyphs aren't sliced after Flip. */
-  padding-block: 0.1em;
 }
 
 .experience__title-reveal-track {
   display: inline-block;
   white-space: nowrap;
   text-align: inherit;
-  /* line-height 0.5 makes the box shorter than the glyphs, so pad the box to enclose
-     the ink; equal negative margin cancels the layout growth so the masthead stays tight. */
-  padding-block: 0.5em;
-  margin-block: -0.5em;
+  padding-block: 0;
+  margin-block: 0;
 }
 
 /*
@@ -465,13 +463,15 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
  */
 @media (min-width: 1600px) and (min-aspect-ratio: 16 / 9) {
   .experience__title-bleed {
-    height: clamp(19rem, 20vw, 28rem);
-    display: flex;
-    align-items: flex-end;
+    height: clamp(24rem, 23vw, 44rem);
   }
 
   .experience__title {
-    height: auto;
+    height: 100%;
+  }
+
+  .experience__title-reveal-clip {
+    top: 0.08em;
   }
 
   .experience__title-overline {
