@@ -456,14 +456,13 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 }
 
 /*
- * “Wild Grace” is materially shorter than the Blooming Diva reference. On wide,
- * shallow displays, fitting it by width alone makes the script dominate the full
- * viewport height. Preserve the edge-to-edge wordmark while matching the reference
- * masthead's optical height; normal desktop, tablet, and mobile remain unscaled.
+ * Blooming Diva masthead model: reserve a real top band for the huge script, then
+ * place nav/meta below. The wordmark can be naturally cropped by the viewport,
+ * but it must not collapse the header or collide with the navigation row.
  */
-@media (min-width: 1600px) and (min-aspect-ratio: 16 / 9) {
+@media (min-width: 900px) {
   .experience__title-bleed {
-    height: clamp(24rem, 23vw, 44rem);
+    height: clamp(24rem, 60vh, 31rem);
   }
 
   .experience__title {
@@ -471,7 +470,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   }
 
   .experience__title-reveal-clip {
-    top: 0.08em;
+    top: 0.05em;
   }
 
   .experience__title-overline {
