@@ -21,12 +21,14 @@ import { TextReveal } from "@/components/text-reveal";
 import { estimateLineCount } from "@/lib/estimate-line-count";
 import { revealAfterLines } from "@/lib/reveal-hierarchy";
 import {
+  DURATION_TRANSFORM_S,
   EASE_TRANSFORM,
   GRID_IMAGE_INITIAL_BLUR_PX,
   GRID_IMAGE_INITIAL_SCALE,
   GRID_IMAGE_REVEAL_DURATION_S,
   GRID_REVEAL_TAIL_LINE_SLOTS,
   LANDING_INFO_PANEL_TEXT_REVEAL_LAG_S,
+  PICNIC_FEATURE_TEXT_REVEAL_LAG_S,
   LINE_STAGGER_S,
 } from "@/lib/reveal-motion";
 import type { SiteContent, TopicKey } from "@/lib/site-content";
@@ -118,7 +120,9 @@ export function SummerPhotoDayExperience({
     const locationDelay = revealAfterLines(c);
     c += estimateLineCount(content.location);
     const dateDelay = revealAfterLines(c);
-    c += estimateLineCount(content.date);
+    if (content.date) {
+      c += estimateLineCount(content.date);
+    }
     const priceDelay = revealAfterLines(c);
     return { locationDelay, dateDelay, priceDelay };
   }, [content.location, content.date]);
@@ -188,6 +192,26 @@ export function SummerPhotoDayExperience({
     }
     return { introParagraphs, info };
   }, [content.introText, content.infoLines]);
+
+  const picnicFeatureReveal = useMemo(() => {
+    const lag = PICNIC_FEATURE_TEXT_REVEAL_LAG_S;
+    let c = 0;
+    const eyebrowDelay = lag + revealAfterLines(c);
+    c += estimateLineCount(content.picnicFeature.eyebrow);
+    const titleDelay = lag + revealAfterLines(c);
+    c += estimateLineCount(content.picnicFeature.title);
+    const description: { paragraph: string; blockDelay: number }[] = [];
+    for (const paragraph of content.picnicFeature.description) {
+      description.push({ paragraph, blockDelay: lag + revealAfterLines(c) });
+      c += estimateLineCount(paragraph);
+    }
+    const includes: { item: string; blockDelay: number }[] = [];
+    for (const item of content.picnicFeature.includes) {
+      includes.push({ item, blockDelay: lag + revealAfterLines(c) });
+      c += estimateLineCount(item);
+    }
+    return { eyebrowDelay, titleDelay, description, includes };
+  }, [content.picnicFeature]);
 
   const marqueeTrack = useMemo(() => {
     return marqueeImages.slice(0, 56);
@@ -326,6 +350,10 @@ export function SummerPhotoDayExperience({
   }, [applyMode]);
 
   const toggleLandingInfo = useCallback(() => {
+    if (!window.matchMedia("(max-width: 720px)").matches) {
+      return;
+    }
+
     setIsPicnicFeatureOpen(false);
     setIsLandingInfoOpen((current) => !current);
   }, []);
@@ -442,16 +470,18 @@ export function SummerPhotoDayExperience({
     };
 
     const handlePointerDown = (event: PointerEvent) => {
+      if (!mobileLandingInfoMq.matches) {
+        setIsLandingInfoOpen(false);
+        return;
+      }
+
       const panel = landingInfoPanelRef.current;
       if (!panel || panel.contains(event.target as Node)) {
         return;
       }
 
-      if (mobileLandingInfoMq.matches) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
+      event.preventDefault();
+      event.stopPropagation();
       setIsLandingInfoOpen(false);
     };
 
@@ -1056,7 +1086,13 @@ export function SummerPhotoDayExperience({
                 aria-label={
                   activeMode === "signup"
                     ? "Перейти к форме заявки"
-                    : `${content.registerLabel}: ${content.location}, ${content.date}, ${content.priceLabel}`
+                    : `${content.registerLabel}: ${[
+                        content.location,
+                        content.date,
+                        content.priceLabel,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}`
                 }
               >
                 <TextReveal
@@ -1065,12 +1101,14 @@ export function SummerPhotoDayExperience({
                   text={content.location}
                   blockDelay={headerMetaReveal.locationDelay}
                 />
-                <TextReveal
-                  as="span"
-                  className="experience__meta-item"
-                  text={content.date}
-                  blockDelay={headerMetaReveal.dateDelay}
-                />
+                {content.date ? (
+                  <TextReveal
+                    as="span"
+                    className="experience__meta-item"
+                    text={content.date}
+                    blockDelay={headerMetaReveal.dateDelay}
+                  />
+                ) : null}
                 <TextReveal
                   as="span"
                   className="experience__meta-item"
@@ -1216,69 +1254,67 @@ export function SummerPhotoDayExperience({
             )}
           </section>
         </section>
+      </main>
 
-        <div className="landing-panel__cta sticky-register experience__register-cta">
-          <div className="experience__register-cta-stack">
-            {activeMode !== "signup" && content.signup.spotsLeftText.trim() ? (
-              <TextReveal
-                playOnce
-                as="span"
-                className="sticky-register__spots-hint"
-                text={content.signup.spotsLeftText}
-                blockDelay={Math.max(
-                  0,
-                  registerCtaRevealDelay - LINE_STAGGER_S,
-                )}
-              />
-            ) : null}
-            <div
-              className="experience__register-cta-button-wrap"
-              style={
-                {
-                  "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
-                } as CSSProperties
+      {activeMode !== "signup" && content.signup.spotsLeftText.trim() ? (
+        <TextReveal
+          playOnce
+          as="span"
+          className="sticky-register__spots-hint"
+          text={content.signup.spotsLeftText}
+          blockDelay={Math.max(0, registerCtaRevealDelay - LINE_STAGGER_S)}
+        />
+      ) : null}
+
+      <div className="landing-panel__cta sticky-register experience__register-cta">
+        <div className="experience__register-cta-stack">
+          <div
+            className="experience__register-cta-button-wrap"
+            style={
+              {
+                "--filled-bg-delay": `${registerCtaRevealDelay + 0.48}s`,
+              } as CSSProperties
+            }
+          >
+            <button
+              className={`sticky-register__button landing-panel__register-button interactive${
+                activeMode === "signup" ? "" : " interactive--accent"
+              }`}
+              type="button"
+              onClick={
+                activeMode === "signup"
+                  ? () =>
+                      applyMode(modeBeforeSignupRef.current, {
+                        updateUrl: true,
+                      })
+                  : toggleRegisterMode
               }
             >
-              <button
-                className={`sticky-register__button landing-panel__register-button interactive${
-                  activeMode === "signup" ? "" : " interactive--accent"
-                }`}
-                type="button"
-                onClick={
+              {/* Keep register TextReveal mounted; hide on signup so Back does not replay the reveal or resize the label */}
+              <span
+                className={
                   activeMode === "signup"
-                    ? () =>
-                        applyMode(modeBeforeSignupRef.current, {
-                          updateUrl: true,
-                        })
-                    : toggleRegisterMode
+                    ? "experience__register-cta-layer experience__register-cta-layer--concealed"
+                    : "experience__register-cta-layer"
                 }
+                aria-hidden={activeMode === "signup"}
               >
-                {/* Keep register TextReveal mounted; hide on signup so Back does not replay the reveal or resize the label */}
-                <span
-                  className={
-                    activeMode === "signup"
-                      ? "experience__register-cta-layer experience__register-cta-layer--concealed"
-                      : "experience__register-cta-layer"
-                  }
-                  aria-hidden={activeMode === "signup"}
-                >
-                  <TextReveal
-                    playOnce
-                    as="span"
-                    text={content.registerLabel}
-                    blockDelay={registerCtaRevealDelay}
-                  />
+                <TextReveal
+                  playOnce
+                  as="span"
+                  text={content.registerLabel}
+                  blockDelay={registerCtaRevealDelay}
+                />
+              </span>
+              {activeMode === "signup" ? (
+                <span className="experience__register-cta-layer experience__register-cta-layer--back">
+                  Back
                 </span>
-                {activeMode === "signup" ? (
-                  <span className="experience__register-cta-layer experience__register-cta-layer--back">
-                    Back
-                  </span>
-                ) : null}
-              </button>
-            </div>
+              ) : null}
+            </button>
           </div>
         </div>
-      </main>
+      </div>
 
       {onLanding ? (
         <article
@@ -1297,19 +1333,57 @@ export function SummerPhotoDayExperience({
             ) : null}
           </div>
           <div className="picnic-feature__content">
-            <p className="picnic-feature__eyebrow">
-              {content.picnicFeature.eyebrow}
-            </p>
-            <h2>{content.picnicFeature.title}</h2>
+            <TextReveal
+              as="p"
+              className="picnic-feature__eyebrow"
+              text={content.picnicFeature.eyebrow}
+              blockDelay={picnicFeatureReveal.eyebrowDelay}
+              playWhen={isPicnicFeatureOpen}
+            />
+            <TextReveal
+              as="h2"
+              text={content.picnicFeature.title}
+              blockDelay={picnicFeatureReveal.titleDelay}
+              playWhen={isPicnicFeatureOpen}
+            />
             <div className="picnic-feature__description">
-              {content.picnicFeature.description.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+              {picnicFeatureReveal.description.map(({ paragraph, blockDelay }, index) => (
+                <TextReveal
+                  key={`picnic-desc-${index}`}
+                  text={paragraph}
+                  blockDelay={blockDelay}
+                  playWhen={isPicnicFeatureOpen}
+                />
               ))}
             </div>
             <ul className="picnic-feature__includes">
-              {content.picnicFeature.includes.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {picnicFeatureReveal.includes.map(({ item, blockDelay }) => {
+                const lineCount = Math.max(1, estimateLineCount(item, 18));
+                const borderDelay =
+                  blockDelay +
+                  DURATION_TRANSFORM_S +
+                  LINE_STAGGER_S * Math.max(0, lineCount - 1) +
+                  0.035;
+
+                return (
+                  <li
+                    key={item}
+                    style={
+                      {
+                        "--picnic-include-border-delay": `${borderDelay}s`,
+                      } as CSSProperties
+                    }
+                  >
+                    <TextReveal
+                      as="span"
+                      className="picnic-feature__includes-item"
+                      text={item}
+                      blockDelay={blockDelay}
+                      playWhen={isPicnicFeatureOpen}
+                    />
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </article>

@@ -2,60 +2,62 @@
 
 import { gsap } from "gsap";
 import { Flip } from "gsap/Flip";
-import { flushSync } from "react-dom";
 import { memo, useCallback, useLayoutEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(Flip);
 
 const TITLE_INTRO_FROM = {
   opacity: 0,
-  filter: "blur(12px)",
+  scale: 0.94,
+  z: -28,
+  transformOrigin: "50% 50%",
+  force3D: true,
 } as const;
 
 const OVERLINE_INTRO_FROM = {
   opacity: 0,
-  filter: "blur(8px)",
+  force3D: true,
 } as const;
 
-function animateBlurIntro(
-  track: HTMLElement,
-  overline: HTMLElement,
-): Promise<void> {
+const INTRO_BEAT_GAP = 0.07;
+
+/** Stagger opacity ahead of depth without filter surfaces that clip script swashes. */
+function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     gsap
       .timeline({
+        defaults: { force3D: true, transformOrigin: "50% 50%" },
         onComplete: resolve,
       })
-      .to(
-        track,
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.7,
-          ease: "power2.out",
-        },
-        0,
-      )
-      .to(
-        overline,
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.5,
-          ease: "power2.out",
-        },
-        0.72,
-      );
+      .to(track, { opacity: 1, duration: 0.52, ease: "power2.out" }, 0)
+      .to(track, { scale: 1, z: 0, duration: 0.9, ease: "power3.out" }, 0);
   });
+}
+
+function animateOverlineIntro(overline: HTMLElement): Promise<void> {
+  return new Promise((resolve) => {
+    gsap
+      .timeline({ defaults: { force3D: true }, onComplete: resolve })
+      .to(overline, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0);
+  });
+}
+
+async function animateIntroSequence(
+  track: HTMLElement,
+  overline: HTMLElement,
+): Promise<void> {
+  await animateTitleIntro(track);
+  await gsap.to({}, { duration: INTRO_BEAT_GAP });
+  await animateOverlineIntro(overline);
 }
 
 type ExperienceTitleProps = {
   label: string;
   overlineLabel: string;
   onClick: () => void;
-  /** When true, reveal at center, then move into the final header position. */
+  /** When true, run the intro: centered reveal, then Flip to header after window load. */
   preloader?: boolean;
-  /** Fired once the move into the header finishes. */
+  /** Fired once the Flip-to-header animation finishes. */
   onPreloaderComplete?: () => void;
 };
 
@@ -70,7 +72,9 @@ function fitTitleFontSize(
   targetWidthPx: number,
 ): number {
   let lo = 6;
-  let hi = 720;
+  // Let ultra-wide layouts fit naturally by width. A fixed pixel cap makes the
+  // short “Wild Grace” wordmark stall halfway across huge screens.
+  let hi = Math.max(720, targetWidthPx);
   for (let i = 0; i < 40; i++) {
     const mid = (lo + hi) / 2;
     titleRoot.style.fontSize = `${mid}px`;
@@ -99,6 +103,7 @@ function waitForWindowLoad(): Promise<void> {
   });
 }
 
+/** Match header bleed geometry so intro doesn’t re-center text (avoids a left jump on Flip). */
 function getBleedFrame(bleed: HTMLElement) {
   const rect = bleed.getBoundingClientRect();
   const layoutWidth =
@@ -202,16 +207,17 @@ function ExperienceTitleComponent({
     if (!bleed) {
       return;
     }
-    const ro = new ResizeObserver(() => {
-      requestAnimationFrame(applyFit);
-    });
+    const scheduleFit = () => {
+      requestAnimationFrame(() => applyFit());
+    };
+    const ro = new ResizeObserver(scheduleFit);
     ro.observe(bleed);
-    window.addEventListener("orientationchange", applyFit);
-    window.visualViewport?.addEventListener("resize", applyFit);
+    window.addEventListener("orientationchange", scheduleFit);
+    window.visualViewport?.addEventListener("resize", scheduleFit);
     return () => {
       ro.disconnect();
-      window.removeEventListener("orientationchange", applyFit);
-      window.visualViewport?.removeEventListener("resize", applyFit);
+      window.removeEventListener("orientationchange", scheduleFit);
+      window.visualViewport?.removeEventListener("resize", scheduleFit);
     };
   }, [applyFit]);
 
@@ -225,14 +231,20 @@ function ExperienceTitleComponent({
       const overline = titleRoot?.querySelector<HTMLElement>(
         ".experience__title-overline",
       );
+      const clip = titleRoot?.querySelector<HTMLElement>(
+        ".experience__title-reveal-clip",
+      );
       if (titleRoot) {
         gsap.killTweensOf(titleRoot);
         gsap.set(titleRoot, { clearProps: "opacity,visibility" });
       }
+      if (clip) {
+        gsap.set(clip, { clearProps: "perspective" });
+      }
       if (track) {
         gsap.killTweensOf(track);
         gsap.set(track, {
-          clearProps: "opacity,filter",
+          clearProps: "opacity,transform,filter,transformOrigin",
         });
       }
       if (overline) {
@@ -255,7 +267,10 @@ function ExperienceTitleComponent({
     const overline = titleRoot?.querySelector<HTMLElement>(
       ".experience__title-overline",
     );
-    if (!bleed || !titleRoot || !track || !overline) {
+    const clip = titleRoot?.querySelector<HTMLElement>(
+      ".experience__title-reveal-clip",
+    );
+    if (!bleed || !titleRoot || !track || !overline || !clip) {
       return;
     }
 
@@ -277,8 +292,8 @@ function ExperienceTitleComponent({
         if (cancelled) {
           return;
         }
-        await new Promise<void>((r) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => r())),
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
         );
         if (cancelled) {
           return;
@@ -286,23 +301,20 @@ function ExperienceTitleComponent({
 
         bleed.classList.add("experience__title-bleed--preloader-slot");
 
+        /* Depth reveal: scale toward camera (center origin), no xy translate. */
         if (reduceMotion) {
-          gsap.set(track, {
-            opacity: 1,
-            filter: "blur(0px)",
-          });
-          gsap.set(overline, {
-            opacity: 1,
-            filter: "blur(0px)",
-          });
+          gsap.set(clip, { clearProps: "perspective" });
+          gsap.set(track, { opacity: 1, scale: 1, z: 0 });
+          gsap.set(overline, { opacity: 1 });
         } else {
+          gsap.set(clip, { perspective: 1100 });
           gsap.set(track, TITLE_INTRO_FROM);
           gsap.set(overline, OVERLINE_INTRO_FROM);
         }
 
-        flushSync(() => {
-          setIntroSurface(true);
-        });
+        // Queue React state instead of forcing a nested commit from a layout
+        // effect; inline GSAP opacity/z-index make the current frame visible.
+        scheduleIntroSurface(true);
 
         const bleedFrame = getBleedFrame(bleed);
         gsap.set(titleRoot, {
@@ -311,16 +323,21 @@ function ExperienceTitleComponent({
           top: "50%",
           yPercent: -50,
           width: bleedFrame.width,
+          height: "auto",
           textAlign: "left",
           boxSizing: "border-box",
-          zIndex: 10050,
           opacity: 1,
+          zIndex: 10050,
         });
 
+        if (cancelled) {
+          return;
+        }
+
         if (!reduceMotion) {
-          await animateBlurIntro(track, overline);
-          gsap.set(track, { clearProps: "filter" });
-          gsap.set(overline, { clearProps: "filter" });
+          await animateIntroSequence(track, overline);
+          gsap.set(track, { clearProps: "transform,transformOrigin" });
+          gsap.set(clip, { clearProps: "perspective" });
         }
         if (cancelled) {
           return;
@@ -331,18 +348,24 @@ function ExperienceTitleComponent({
           return;
         }
 
+        applyFit();
+        if (cancelled) {
+          return;
+        }
+
         const bleedFrameBeforeFlip = getBleedFrame(bleed);
         gsap.set(titleRoot, {
           left: bleedFrameBeforeFlip.left,
           width: bleedFrameBeforeFlip.width,
         });
 
+        /** Record fixed intro layout, then snap to natural header in the DOM; Flip animates into place. */
         const state = Flip.getState(titleRoot);
 
         bleed.classList.remove("experience__title-bleed--preloader-slot");
         gsap.set(titleRoot, {
           clearProps:
-            "position,left,top,width,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
+            "position,left,top,width,height,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
         });
         gsap.set(titleRoot, { opacity: 1 });
 
@@ -355,10 +378,10 @@ function ExperienceTitleComponent({
             introFinishedRef.current = true;
             gsap.set(titleRoot, {
               clearProps:
-                "transform,x,y,xPercent,yPercent,left,top,width,textAlign",
+                "transform,x,y,xPercent,yPercent,left,top,width,height,textAlign",
             });
             gsap.set(titleRoot, { opacity: 1 });
-            gsap.set(track, { clearProps: "opacity,filter" });
+            gsap.set(track, { clearProps: "opacity,transform,filter" });
             gsap.set(overline, { clearProps: "opacity,filter" });
             onPreloaderComplete?.();
           },
@@ -390,13 +413,11 @@ function ExperienceTitleComponent({
         onKeyDown={handleKeyDown}
         aria-label={label}
       >
-        <span className="experience__title-stack">
-          <span className="experience__title-reveal-clip">
-            <span className="experience__title-reveal-track">{label}</span>
-          </span>
-          <span className="experience__title-overline" aria-hidden="true">
-            {overlineLabel}
-          </span>
+        <span className="experience__title-reveal-clip">
+          <span className="experience__title-reveal-track">{label}</span>
+        </span>
+        <span className="experience__title-overline" aria-hidden="true">
+          {overlineLabel}
         </span>
       </div>
     </div>
