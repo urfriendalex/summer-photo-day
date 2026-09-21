@@ -478,6 +478,15 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   }
 }
 
+/* Ultra-wide canvases need a taller masthead reserve. The fitted wordmark keeps
+   spanning the viewport, while the nav and carousel sit below its main strokes;
+   the long “g” swash may still underlap them intentionally. */
+@media (min-width: 2400px) {
+  .experience__title-bleed {
+    height: clamp(24rem, 34vh, 32rem);
+  }
+}
+
 /* Preloader intro — blur/scale must not be clipped by ancestor overflow (Safari). */
 .experience--preloader-intro .experience__header,
 .experience--preloader-intro .experience__title,
