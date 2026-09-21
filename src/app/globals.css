@@ -483,7 +483,11 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
    the long “g” swash may still underlap them intentionally. */
 @media (min-width: 2400px) {
   .experience__title-bleed {
-    height: clamp(24rem, 34vh, 32rem);
+    height: clamp(24rem, 20vw, 44rem);
+  }
+
+  .experience__title-reveal-clip {
+    top: 0.25em;
   }
 }
 

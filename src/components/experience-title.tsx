@@ -19,8 +19,6 @@ const OVERLINE_INTRO_FROM = {
   force3D: true,
 } as const;
 
-const INTRO_BEAT_GAP = 0.07;
-
 /** Stagger opacity ahead of depth without filter surfaces that clip script swashes. */
 function animateTitleIntro(track: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
@@ -32,23 +30,6 @@ function animateTitleIntro(track: HTMLElement): Promise<void> {
       .to(track, { opacity: 1, duration: 0.52, ease: "power2.out" }, 0)
       .to(track, { scale: 1, z: 0, duration: 0.9, ease: "power3.out" }, 0);
   });
-}
-
-function animateOverlineIntro(overline: HTMLElement): Promise<void> {
-  return new Promise((resolve) => {
-    gsap
-      .timeline({ defaults: { force3D: true }, onComplete: resolve })
-      .to(overline, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0);
-  });
-}
-
-async function animateIntroSequence(
-  track: HTMLElement,
-  overline: HTMLElement,
-): Promise<void> {
-  await animateTitleIntro(track);
-  await gsap.to({}, { duration: INTRO_BEAT_GAP });
-  await animateOverlineIntro(overline);
 }
 
 type ExperienceTitleProps = {
@@ -305,7 +286,7 @@ function ExperienceTitleComponent({
         if (reduceMotion) {
           gsap.set(clip, { clearProps: "perspective" });
           gsap.set(track, { opacity: 1, scale: 1, z: 0 });
-          gsap.set(overline, { opacity: 1 });
+          gsap.set(overline, { opacity: 0 });
         } else {
           gsap.set(clip, { perspective: 1100 });
           gsap.set(track, TITLE_INTRO_FROM);
@@ -330,12 +311,23 @@ function ExperienceTitleComponent({
           zIndex: 10050,
         });
 
+        /* Center the rendered script ink rather than the outer control box. The
+           italic swashes and clip offset make those centers diverge on wide screens. */
+        const viewportHeight =
+          window.visualViewport?.height ?? document.documentElement.clientHeight;
+        const introTrackRect = track.getBoundingClientRect();
+        gsap.set(titleRoot, {
+          y:
+            viewportHeight / 2 -
+            (introTrackRect.top + introTrackRect.bottom) / 2,
+        });
+
         if (cancelled) {
           return;
         }
 
         if (!reduceMotion) {
-          await animateIntroSequence(track, overline);
+          await animateTitleIntro(track);
           gsap.set(track, { clearProps: "transform,transformOrigin" });
           gsap.set(clip, { clearProps: "perspective" });
         }

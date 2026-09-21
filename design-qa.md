@@ -1,43 +1,51 @@
-# Ultra-wide Masthead Design QA
+# Ultra-wide Intro and Landing Design QA
 
-- Source visual truth: `/var/folders/rc/2krlq17n7558pxxf7lqr4sbm0000gn/T/TemporaryItems/NSIRD_screencaptureui_gngLEA/Screenshot 2026-09-21 at 22.32.25.png`
-- Implementation screenshot: `/tmp/summer-photo-day-ultrawide-final.png`
-- Combined comparison: `/tmp/summer-photo-day-ultrawide-comparison.png`
-- Viewport: 3440 × 1440 CSS px
-- Source pixels: 3440 × 1440; implementation pixels: 3440 × 1440; device scale factor: 1; no density normalization required
-- State: completed landing animation / final masthead state
+- Source visual truth (broken intro): `/Users/ay/Desktop/Screenshot 2026-09-21 at 22.48.17.png`
+- Source visual truth (broken final state): `/Users/ay/Desktop/Screenshot 2026-09-21 at 22.48.21.png`
+- Implementation intro screenshot: `/tmp/summer-photo-day-ultrawide-intro-verified.png`
+- Implementation final screenshot: `/tmp/summer-photo-day-ultrawide-final-pass.png`
+- Combined before/after comparison: `/tmp/summer-photo-day-ultrawide-before-after.png`
+- Reference viewport: 3250 × 1290 CSS px; source screenshots: 3440 × 1440 px; implementation screenshots: 3250 × 1290 px; both normalized to 1720 × 720 per panel for the combined comparison
+- States: centered intro reveal and completed landing frame
 
 ## Full-view comparison evidence
 
-The source shows the fixed-height desktop cap pulling the nav, event metadata, and carousel into the wordmark. The revised implementation reserves 34vh (capped at 32rem) on viewports at least 2400px wide. The nav and metadata now sit below the main letter strokes, the carousel starts below the nav, and the long `g` swash intentionally underlaps the content layer. The title remains fitted edge-to-edge.
+The broken intro used the outer control box for vertical centering, leaving the visible italic ink low and showing the event label on top of the lettering. The corrected intro centers the rendered wordmark track at the viewport midpoint and keeps the event label hidden until the title lands.
+
+The broken final state used a height-driven masthead reserve while title size was width-driven. The corrected ultra-wide breakpoint reserves width-proportional height, keeps the wordmark full-width, places the event label below the main strokes, and separates the nav and carousel. The `g` swash remains behind the carousel by design.
 
 ## Focused-region evidence
 
-The masthead/nav boundary was measured directly in the in-app browser. At 3440 × 1440, the overline ends at y=496.8, the nav begins at y=519.2, and the carousel begins at y=569.2. There is no overline/nav, overline/carousel, or nav/carousel collision and no horizontal overflow.
+- Intro track center delta: less than 0.01px at 3250 × 1290.
+- Final title bottom: y=672.2; nav begins at y=679.6; carousel begins at y=729.6.
+- Event label ends at y=657.2, above the nav.
+- No title/nav, label/nav, label/carousel, or nav/carousel collision.
+- No horizontal overflow or framework error overlay.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: unchanged; the existing display font, weight, fit, and full-width scale are preserved.
-- Spacing and layout rhythm: ultra-wide masthead reserve increased only at the 2400px breakpoint; nav and carousel alignment now match the intended Blooming Diva structure.
-- Colors and visual tokens: unchanged and consistent with the source.
-- Image quality and asset fidelity: unchanged source photography, crops, and layering; the `g` underlap remains behind the carousel.
-- Copy and content: unchanged.
+- Fonts and typography: existing display and body fonts, weights, fitted width, and antialiasing remain unchanged.
+- Spacing and layout rhythm: intro is optically centered; final ultra-wide masthead, metadata, nav, and carousel occupy distinct vertical bands.
+- Colors and visual tokens: unchanged.
+- Image quality and asset fidelity: original photography and crops are unchanged; no replacement assets were introduced.
+- Copy and content: unchanged; unstable date remains omitted.
 
 ## Responsive and interaction verification
 
-- Checked 390×844, 768×1024, 1440×900, 2048×1152, and 3440×1440.
-- Intro animation enters from the viewport center at every tested size and settles into the final masthead.
-- No horizontal overflow, framework error overlay, or browser page error.
-- No overline/nav, overline/carousel, or nav/carousel collision at any tested size.
+- Replayed intro and final states at 390×844, 768×1024, 1440×900, 2048×1152, and 3250×1290.
+- Intro ink center delta was 0px at every tested viewport, and the event label remained hidden during the centered reveal.
+- Final frames had no label/nav, label/content, or nav/content collision and no horizontal overflow.
+- Browser console and framework overlay checks were clean.
 
 ## Comparison history
 
-- P1: At 3440×1440 the 24rem desktop masthead cap placed navigation and metadata inside the title strokes. Fixed with an ultra-wide-only masthead reserve and re-captured at the same viewport.
-- Post-fix evidence: navigation y=519.2–543.6 and carousel y=569.2+, with the intended `g` underlap painted below the content layer.
+- P1: Intro wordmark was optically low and the event label collided with it. Fixed by centering from the rendered track bounds and delaying the label until the landing frame.
+- P1: Final ultra-wide title collided with nav/meta because a height-based reserve diverged from width-fitted type. Fixed with a width-proportional ultra-wide masthead and optical clip offset.
+- Post-fix evidence: `/tmp/summer-photo-day-ultrawide-before-after.png`.
 
 ## Findings
 
-No actionable P0, P1, or P2 differences remain for the requested ultra-wide positioning fix.
+No actionable P0, P1, or P2 differences remain for the reported intro and final ultra-wide positioning defects.
 
 ## Follow-up polish
 
