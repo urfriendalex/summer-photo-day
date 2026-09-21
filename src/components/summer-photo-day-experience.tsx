@@ -1024,7 +1024,11 @@ export function SummerPhotoDayExperience({
           <div className="experience__preloader-overlay" aria-hidden="true" />
         ) : null}
         <section className="experience__shell">
-          <header className="experience__header">
+          <header
+            className={`experience__header${
+              navDocked ? " experience__header--nav-docked" : ""
+            }`}
+          >
             <ExperienceTitle
               label={content.projectTitle}
               overlineLabel={content.overlineLabel}

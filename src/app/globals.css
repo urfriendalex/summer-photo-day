@@ -564,6 +564,12 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   backdrop-filter: blur(var(--landing-info-frost-blur)) saturate(0.9);
 }
 
+/* The fixed row remains inside the header stacking context. Lift that context
+   above page content only while docked, while keeping lightboxes and sheets on top. */
+.experience__header--nav-docked {
+  z-index: 10150;
+}
+
 .experience__nav {
   display: flex;
   flex-wrap: nowrap;
