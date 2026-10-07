@@ -288,8 +288,23 @@ function ExperienceTitleComponent({
         // Do not reveal or size the script against a fallback face: its advance
         // width can differ enough to crop the title before the web font swaps in.
         if (document.fonts) {
-          const font = window.getComputedStyle(titleRoot).font;
-          await document.fonts.load(font, label).catch(() => []);
+          const fontStyles = window.getComputedStyle(titleRoot);
+          // Safari can serialize `getComputedStyle(...).font` as an empty string
+          // for this variable-backed font. `FontFaceSet.load("")` throws before
+          // `.catch()` can run, leaving the intro title hidden forever. Build the
+          // shorthand from its computed longhands instead.
+          const font = [
+            fontStyles.fontStyle,
+            fontStyles.fontWeight,
+            fontStyles.fontSize,
+            fontStyles.fontFamily,
+          ].join(" ");
+          try {
+            await document.fonts.load(font, label);
+          } catch {
+            // `document.fonts.ready` below still allows a gracefully loaded
+            // fallback on browsers that reject a particular font shorthand.
+          }
           await document.fonts.ready;
         }
         applyFit();
