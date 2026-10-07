@@ -84,41 +84,46 @@ function waitForWindowLoad(): Promise<void> {
   });
 }
 
-/** Match header bleed geometry so intro doesn’t re-center text (avoids a left jump on Flip). */
+/** Keep the title inside the visible viewport, including Safari's shifted visual viewport. */
 function getBleedFrame(bleed: HTMLElement) {
   const rect = bleed.getBoundingClientRect();
   const layoutWidth =
     typeof document !== "undefined"
       ? document.documentElement.clientWidth
       : rect.width;
-  const viewportWidth =
-    typeof window !== "undefined"
-      ? (window.visualViewport?.width ?? layoutWidth)
-      : rect.width;
+  const layoutHeight =
+    typeof document !== "undefined"
+      ? document.documentElement.clientHeight
+      : rect.height;
+  const visualViewport =
+    typeof window !== "undefined" ? window.visualViewport : undefined;
+  const viewportLeft = visualViewport?.offsetLeft ?? 0;
+  const viewportTop = visualViewport?.offsetTop ?? 0;
+  const viewportWidth = visualViewport?.width ?? layoutWidth;
+  const viewportHeight = visualViewport?.height ?? layoutHeight;
+  const left = Math.max(0, rect.left, viewportLeft);
+  const right = Math.min(
+    rect.right,
+    layoutWidth,
+    viewportLeft + viewportWidth,
+  );
+  const top = Math.max(0, viewportTop);
+  const bottom = Math.min(layoutHeight, viewportTop + viewportHeight);
 
   return {
-    left: Math.max(0, rect.left),
-    width: Math.min(rect.width, layoutWidth, viewportWidth),
+    left,
+    top,
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top),
   };
 }
 
 function getTitleFitWidth(bleed: HTMLElement, paddingX: number): number {
-  const rect = bleed.getBoundingClientRect();
-  const layoutWidth =
-    typeof document !== "undefined"
-      ? document.documentElement.clientWidth
-      : rect.width;
-  const viewportWidth =
-    typeof window !== "undefined"
-      ? (window.visualViewport?.width ?? layoutWidth)
-      : rect.width;
-  const effectiveWidth = Math.min(
-    bleed.clientWidth,
-    rect.width,
-    layoutWidth,
-    viewportWidth,
+  const frame = getBleedFrame(bleed);
+  return Math.max(
+    32,
+    (Math.min(bleed.clientWidth, frame.width) - paddingX) * 0.998,
   );
-  return Math.max(32, (effectiveWidth - paddingX) * 0.998);
 }
 
 function ExperienceTitleComponent({
@@ -130,6 +135,7 @@ function ExperienceTitleComponent({
 }: ExperienceTitleProps) {
   const bleedRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
+  const syncIntroLayoutRef = useRef<(() => void) | null>(null);
   const introStartedRef = useRef(false);
   const introFinishedRef = useRef(false);
   /** Declarative “surface visible” so CSS opacity survives parent re-renders during the intro. */
@@ -191,14 +197,24 @@ function ExperienceTitleComponent({
     const scheduleFit = () => {
       requestAnimationFrame(() => applyFit());
     };
+    const scheduleViewportSync = () => {
+      requestAnimationFrame(() => {
+        applyFit();
+        syncIntroLayoutRef.current?.();
+      });
+    };
     const ro = new ResizeObserver(scheduleFit);
     ro.observe(bleed);
-    window.addEventListener("orientationchange", scheduleFit);
-    window.visualViewport?.addEventListener("resize", scheduleFit);
+    window.addEventListener("resize", scheduleViewportSync);
+    window.addEventListener("orientationchange", scheduleViewportSync);
+    window.visualViewport?.addEventListener("resize", scheduleViewportSync);
+    window.visualViewport?.addEventListener("scroll", scheduleViewportSync);
     return () => {
       ro.disconnect();
-      window.removeEventListener("orientationchange", scheduleFit);
-      window.visualViewport?.removeEventListener("resize", scheduleFit);
+      window.removeEventListener("resize", scheduleViewportSync);
+      window.removeEventListener("orientationchange", scheduleViewportSync);
+      window.visualViewport?.removeEventListener("resize", scheduleViewportSync);
+      window.visualViewport?.removeEventListener("scroll", scheduleViewportSync);
     };
   }, [applyFit]);
 
@@ -269,6 +285,13 @@ function ExperienceTitleComponent({
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const runIntro = async () => {
+        // Do not reveal or size the script against a fallback face: its advance
+        // width can differ enough to crop the title before the web font swaps in.
+        if (document.fonts) {
+          const font = window.getComputedStyle(titleRoot).font;
+          await document.fonts.load(font, label).catch(() => []);
+          await document.fonts.ready;
+        }
         applyFit();
         if (cancelled) {
           return;
@@ -297,30 +320,31 @@ function ExperienceTitleComponent({
         // effect; inline GSAP opacity/z-index make the current frame visible.
         scheduleIntroSurface(true);
 
-        const bleedFrame = getBleedFrame(bleed);
-        gsap.set(titleRoot, {
-          position: "fixed",
-          left: bleedFrame.left,
-          top: "50%",
-          yPercent: -50,
-          width: bleedFrame.width,
-          height: "auto",
-          textAlign: "left",
-          boxSizing: "border-box",
-          opacity: 1,
-          zIndex: 10050,
-        });
+        const syncIntroLayout = () => {
+          const frame = getBleedFrame(bleed);
+          const centerY = frame.top + frame.height / 2;
+          gsap.set(titleRoot, {
+            position: "fixed",
+            left: frame.left,
+            top: centerY,
+            yPercent: -50,
+            width: frame.width,
+            height: "auto",
+            textAlign: "left",
+            boxSizing: "border-box",
+            opacity: 1,
+            zIndex: 10050,
+          });
 
-        /* Center the rendered script ink rather than the outer control box. The
-           italic swashes and clip offset make those centers diverge on wide screens. */
-        const viewportHeight =
-          window.visualViewport?.height ?? document.documentElement.clientHeight;
-        const introTrackRect = track.getBoundingClientRect();
-        gsap.set(titleRoot, {
-          y:
-            viewportHeight / 2 -
-            (introTrackRect.top + introTrackRect.bottom) / 2,
-        });
+          /* Center the rendered script ink, not the outer control box. The
+             italic swashes and clip offset make those centers diverge. */
+          const introTrackRect = track.getBoundingClientRect();
+          gsap.set(titleRoot, {
+            y: centerY - (introTrackRect.top + introTrackRect.bottom) / 2,
+          });
+        };
+        syncIntroLayoutRef.current = syncIntroLayout;
+        syncIntroLayout();
 
         if (cancelled) {
           return;
@@ -355,6 +379,7 @@ function ExperienceTitleComponent({
         const state = Flip.getState(titleRoot);
 
         bleed.classList.remove("experience__title-bleed--preloader-slot");
+        syncIntroLayoutRef.current = null;
         gsap.set(titleRoot, {
           clearProps:
             "position,left,top,width,height,textAlign,boxSizing,zIndex,xPercent,yPercent,transform",
@@ -385,12 +410,13 @@ function ExperienceTitleComponent({
 
     return () => {
       cancelled = true;
+      syncIntroLayoutRef.current = null;
       if (!introFinishedRef.current) {
         ctx.revert();
       }
       introStartedRef.current = false;
     };
-  }, [preloader, applyFit, onPreloaderComplete, scheduleIntroSurface]);
+  }, [preloader, label, applyFit, onPreloaderComplete, scheduleIntroSurface]);
 
   return (
     <div className="experience__title-bleed" ref={bleedRef}>

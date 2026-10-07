@@ -457,8 +457,8 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 
 /*
  * Blooming Diva masthead model: reserve a real top band for the huge script, then
- * place nav/meta below. The wordmark can be naturally cropped by the viewport,
- * but it must not collapse the header or collide with the navigation row.
+ * place nav/meta below. Fit the complete wordmark inside the viewport while keeping
+ * it large; never rely on viewport cropping to create the oversized look.
  */
 @media (min-width: 900px) {
   .experience__title-bleed {
