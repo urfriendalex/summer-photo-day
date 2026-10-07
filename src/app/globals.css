@@ -800,9 +800,9 @@ button.experience__meta--cta:focus-visible {
   transform-origin: left bottom;
   pointer-events: none;
   transition:
-    opacity var(--duration-panel-enter) var(--ease-interaction),
+    opacity 120ms var(--ease-interaction) 240ms,
     transform 360ms var(--ease-drawer),
-    visibility 0s linear var(--duration-panel-enter);
+    visibility 0s linear 360ms;
 }
 
 .picnic-feature.is-open {
@@ -2154,6 +2154,8 @@ button.experience__meta--cta:focus-visible {
   }
 
   .picnic-feature {
+    /* Keep the closing sheet above the controls until its reverse transition ends. */
+    z-index: 10340;
     grid-template-columns: 1fr;
     grid-template-rows: minmax(10rem, 38svh) minmax(0, 1fr);
     gap: 0.85rem;
