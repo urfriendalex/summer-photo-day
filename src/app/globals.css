@@ -1186,6 +1186,7 @@ button.experience__meta--cta:focus-visible {
 }
 
 .topic-detail__grid-switch-button {
+  touch-action: manipulation;
   display: grid;
   min-width: 2.5rem;
   height: 2.5rem;
