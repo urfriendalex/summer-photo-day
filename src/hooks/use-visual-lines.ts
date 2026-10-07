@@ -8,7 +8,7 @@ import {
   type RefObject,
 } from "react";
 
-import { measureVisualLines } from "@/lib/visual-line-wrap";
+import { layoutWidthForMeasure, measureVisualLines } from "@/lib/visual-line-wrap";
 
 /**
  * Splits `text` into visual lines matching normal HTML/CSS wrapping on `ref`
@@ -17,6 +17,7 @@ import { measureVisualLines } from "@/lib/visual-line-wrap";
 export function useVisualLines<T extends HTMLElement>(
   text: string,
   ref: RefObject<T | null>,
+  active = true,
 ): string[] | null {
   const [lines, setLines] = useState<string[] | null>(null);
 
@@ -26,7 +27,7 @@ export function useVisualLines<T extends HTMLElement>(
       return;
     }
 
-    if (el.getBoundingClientRect().width <= 0) {
+    if (layoutWidthForMeasure(el) <= 0) {
       return;
     }
 
@@ -39,7 +40,7 @@ export function useVisualLines<T extends HTMLElement>(
       if (!el) {
         return;
       }
-      if (el.getBoundingClientRect().width <= 0) {
+      if (layoutWidthForMeasure(el) <= 0) {
         requestAnimationFrame(tick);
         return;
       }
@@ -49,12 +50,16 @@ export function useVisualLines<T extends HTMLElement>(
   }, [relayout, ref]);
 
   useLayoutEffect(() => {
+    if (!active) {
+      return;
+    }
+
     if (typeof document === "undefined" || !document.fonts) {
       scheduleLayout();
       return;
     }
     void document.fonts.ready.then(scheduleLayout);
-  }, [scheduleLayout]);
+  }, [active, scheduleLayout]);
 
   useEffect(() => {
     const el = ref.current;

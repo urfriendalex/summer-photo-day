@@ -27,6 +27,11 @@ export type TextRevealProps = {
    * effect runs (e.g. parent `blockDelay` changing) keep the final revealed state without replaying.
    */
   playOnce?: boolean;
+  /**
+   * When set, drives the reveal instead of viewport intersection (e.g. overlay panels).
+   * Animates while `true`; resets to the hidden line state while `false`.
+   */
+  playWhen?: boolean;
 };
 
 function isElementInViewport(el: HTMLElement): boolean {
@@ -72,10 +77,15 @@ export function TextReveal({
   renderLine,
   blockDelay = 0,
   playOnce = false,
+  playWhen,
 }: TextRevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const hasAnimatedRef = useRef(false);
-  const lines = useVisualLines(text, ref as RefObject<HTMLElement | null>);
+  const lines = useVisualLines(
+    text,
+    ref as RefObject<HTMLElement | null>,
+    playWhen !== undefined ? playWhen : true,
+  );
 
   useLayoutEffect(() => {
     const root = ref.current;
@@ -112,11 +122,13 @@ export function TextReveal({
 
       underlineHosts.forEach((el) => el.classList.add("text-reveal-underline--pending"));
 
-      gsap.set(inners, {
-        yPercent: 100,
+      const hiddenLineState = {
+        yPercent: 118,
         transformOrigin: "50% 100%",
         force3D: false,
-      });
+      } as const;
+
+      gsap.set(inners, hiddenLineState);
 
       let played = false;
       const play = () => {
@@ -139,6 +151,19 @@ export function TextReveal({
           },
         });
       };
+
+      if (playWhen !== undefined) {
+        if (!playWhen) {
+          gsap.set(inners, hiddenLineState);
+          underlineHosts.forEach((el) =>
+            el.classList.add("text-reveal-underline--pending"),
+          );
+          return;
+        }
+
+        play();
+        return;
+      }
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -175,7 +200,7 @@ export function TextReveal({
         clearUnderlineState(underlineHosts);
       }
     };
-  }, [lines, text, blockDelay, playOnce]);
+  }, [lines, text, blockDelay, playOnce, playWhen]);
 
   const mergedClass = [
     "text-reveal",

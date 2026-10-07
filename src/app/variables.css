@@ -15,13 +15,18 @@
   /* Interaction — shared hover/focus color shifts (see .interactive in globals.css) */
   --ease-interaction: cubic-bezier(0.23, 1, 0.32, 1);
   --duration-interaction: 160ms;
-  --color-interactive-ink-hover: #9a7125;
-  --color-interactive-accent-hover: #a88632;
+  --color-interactive-ink-hover: var(--color-accent);
+  --color-interactive-accent-hover: var(--color-accent);
   --color-interactive-inverse-bg-hover: var(--color-pastel-yellow);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-panel-enter: 240ms;
   --landing-info-frost-bg: rgba(251, 245, 232, 0.7);
   --landing-info-frost-blur: 24px;
+  --nav-dock-frost-bg: color-mix(
+    in srgb,
+    var(--color-bg) 78%,
+    var(--color-pastel-yellow) 8%
+  );
   /* Shared frosted chip — `.landing-info-panel` (+) and register CTA pill */
   --landing-frost-chip-border: 1px solid rgba(74, 53, 40, 0.24);
   --landing-frost-chip-height: 48px;
@@ -59,5 +64,7 @@
   --landing-mobile-header-height: 98px;
   /* Taller strip on ≤720px */
   --landing-mobile-marquee-item-height: clamp(24rem, 111vw, 35rem);
+  /* Bottom register / Back pill — matches collapsed `.landing-info-panel` footprint */
+  --landing-mobile-cta-height: var(--landing-frost-chip-height);
   --landing-mobile-cta-font-size: 0.8125rem;
 }
