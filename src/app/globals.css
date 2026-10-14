@@ -435,7 +435,7 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   line-height: 1.1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-ink);
+  color: var(--color-accent-ink);
   pointer-events: none;
   white-space: nowrap;
 }
