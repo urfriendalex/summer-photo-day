@@ -1,15 +1,15 @@
 :root {
-  /* Butter & Meadow — buttercream light, meadow-green ink, rose-blush and butter accents
-     pulled from the photo day itself (yellow tulle, park grass, garden roses). */
-  --color-accent: #e3c25e;
+  /* Rose Butter — milky cream, dusty rose-brown ink, butter and blush accents
+     pulled from the photo day itself (yellow tulle, garden roses, picnic linen). */
+  --color-accent: #f4da8a;
   /* Accent tone dark enough for text on the cream background (≥4.5:1). */
-  --color-accent-ink: #7d6114;
-  --color-bg: #f7f0dd;
-  --color-surface: #fcf8ed;
-  --color-ink: #2f3d29;
-  --color-ink-soft: rgba(47, 61, 41, 0.7);
-  --color-pastel-yellow: #f0dc96;
-  --color-peach: #efd5cb;
+  --color-accent-ink: #9a5f55;
+  --color-bg: #fcf5e6;
+  --color-surface: #fffaf0;
+  --color-ink: #7a4e4a;
+  --color-ink-soft: rgba(122, 78, 74, 0.88);
+  --color-pastel-yellow: #f7e4a6;
+  --color-peach: #f3cfc7;
 
   --radius-base: 0;
 
@@ -21,7 +21,7 @@
   --color-interactive-inverse-bg-hover: var(--color-pastel-yellow);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --duration-panel-enter: 240ms;
-  --landing-info-frost-bg: rgba(252, 248, 237, 0.72);
+  --landing-info-frost-bg: rgba(255, 250, 240, 0.72);
   --landing-info-frost-blur: 24px;
   --nav-dock-frost-bg: color-mix(
     in srgb,
@@ -29,7 +29,7 @@
     var(--color-pastel-yellow) 8%
   );
   /* Shared frosted chip — `.landing-info-panel` (+) and register CTA pill */
-  --landing-frost-chip-border: 1px solid rgba(47, 61, 41, 0.22);
+  --landing-frost-chip-border: 1px solid rgba(122, 78, 74, 0.22);
   --landing-frost-chip-height: 48px;
   --landing-info-panel-pad: 1.25rem;
   --landing-info-panel-toggle-reserve: 3.25rem;
