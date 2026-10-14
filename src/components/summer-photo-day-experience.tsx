@@ -289,7 +289,7 @@ export function SummerPhotoDayExperience({
 
   const handleHeaderMetaCtaClick = useCallback(() => {
     if (activeMode === "signup") {
-      document.getElementById("name")?.focus();
+      document.getElementById("next-photo-day-link")?.focus();
       return;
     }
     toggleRegisterMode();
@@ -339,7 +339,7 @@ export function SummerPhotoDayExperience({
   }, []);
 
   const headerMetaCursorLabel =
-    activeMode === "signup" ? "заполните форму" : content.registerLabel;
+    activeMode === "signup" ? "lizakarasiova.com" : content.registerLabel;
 
   const handlePreloaderSnapComplete = useCallback(() => {
     setIntroState("reveal");
@@ -1084,12 +1084,12 @@ export function SummerPhotoDayExperience({
                   headerMetaCursorFine
                     ? undefined
                     : activeMode === "signup"
-                      ? "Перейти к форме заявки"
+                      ? "Перейти на lizakarasiova.com"
                       : "Перейти к регистрации"
                 }
                 aria-label={
                   activeMode === "signup"
-                    ? "Перейти к форме заявки"
+                    ? "Перейти на lizakarasiova.com"
                     : `${content.registerLabel}: ${[
                         content.location,
                         content.date,

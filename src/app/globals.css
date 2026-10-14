@@ -281,54 +281,60 @@ input {
 /* Full-viewport strip: breaks out of .experience horizontal padding */
 .experience__title-bleed {
   width: calc(100% + (2 * var(--page-pad-x)));
-  max-width: 100%;
+  max-width: none;
   margin-inline: calc(-1 * var(--page-pad-x));
   box-sizing: border-box;
-  /* Body already clips horizontal overflow; keep bleed overflow visible so script
-     descenders (e.g. “g”) aren’t cut once preloader-intro clears overflow overrides. */
-  overflow: visible;
   z-index: 1;
 }
 
+/*
+ * The wordmark is an SVG whose viewBox is the exact ink box of “wild grace”
+ * (see src/lib/wordmark.ts). Its layout box therefore always contains every
+ * swash, so nothing can crop it — no line-height, overflow or Safari layer bounds.
+ * Geometry (fractions of the wordmark width):
+ *   height = 0.3181, baseline = 0.2130 from top, descender band = 0.1051.
+ */
 .experience__title {
   position: relative;
   display: block;
-  box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  overflow: visible;
-  /* Match the sibling's full-bleed wordmark inset while leaving a small ink-safe edge. */
-  padding-left: clamp(6px, 0.9vw, 12px);
-  padding-right: clamp(4px, 0.35vw, 8px);
+  padding-inline: var(--page-pad-x);
   border: 0;
   margin: 0;
   background: transparent;
   color: var(--color-ink);
-  font-family: var(--font-title), var(--font-title-fallback);
-  font-size: clamp(2.8rem, 14vw, 9.5rem);
-  font-weight: 400;
-  /* Keep the compact masthead line from the sibling; the clip's vertical padding
-     below protects Pinyon Script's tall ascenders and deep “g” on Safari. */
-  line-height: 0.5;
-  letter-spacing: 0;
-  text-transform: lowercase;
-  text-align: left;
-  white-space: nowrap;
+  line-height: 0;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   appearance: none;
   -webkit-appearance: none;
 }
 
-/* Hide title only during the initial intro phase — not during reveal (preloader stays on main without this class). */
-.experience--preloader-intro .experience__title {
-  opacity: 0;
+.experience__title:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
 }
 
-/* React toggles this the moment the fixed intro title should become visible. */
-.experience--preloader-intro
-  .experience__title.experience__title--intro-surface {
-  opacity: 1;
-  z-index: 10048;
+.experience__wordmark-frame {
+  position: relative;
+  display: block;
+  /* Height cap keeps landscape phones and short windows from being all wordmark. */
+  width: min(100%, var(--wordmark-max-width, 120svh));
+  margin-inline: auto;
+}
+
+.experience__wordmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 7487 / 2382;
+  overflow: visible;
+  fill: currentColor;
+}
+
+/* Hidden until the intro script takes over (inline opacity wins from then on). */
+.experience--preloader-intro .experience__title {
+  opacity: 0;
 }
 
 /* Overlay is a main child with z-index 10040; without this, it paints above the whole section and hides the title. */
@@ -419,97 +425,19 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
 
 .experience__title-overline {
   position: absolute;
-  right: clamp(-0.5rem, -0.5vw, -0.1rem);
-  bottom: clamp(0.25rem, 0.2vh, 1.125rem);
-  z-index: 2;
+  /* Sits in the empty descender band right under the baseline, clear of the “g”. */
+  top: calc(66.96% + 0.4rem);
+  right: 0;
   display: block;
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(0.625rem, 1.15vw, 1.15rem);
+  font-size: clamp(0.58rem, 0.9vw, 1rem);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding-block: 0.14em;
-  padding-inline: 0.5em;
   color: var(--color-ink);
-  background: transparent;
   pointer-events: none;
   white-space: nowrap;
-}
-
-.experience__title-reveal-clip {
-  position: relative;
-  /* Move the font's oversized ascender ink below the line box; its layout box
-     stays compact so the long “g” can intentionally trail behind the carousel. */
-  top: 0.12em;
-  display: inline-block;
-  max-width: 100%;
-  vertical-align: top;
-  line-height: inherit;
-  overflow: visible;
-  /* Preserve script ascenders/descenders through the reveal and Flip on Safari. */
-  padding-block: 0.1em;
-}
-
-.experience__title-reveal-track {
-  display: inline-block;
-  white-space: nowrap;
-  text-align: inherit;
-  padding-block: 0;
-  margin-block: 0;
-}
-
-/*
- * Blooming Diva masthead model: reserve a real top band for the huge script, then
- * place nav/meta below. Fit the complete wordmark inside the viewport while keeping
- * it large; never rely on viewport cropping to create the oversized look.
- */
-@media (min-width: 900px) {
-  .experience__title-bleed {
-    --experience-title-reserve: clamp(18rem, 43vh, 24rem);
-    min-height: var(--experience-title-reserve);
-  }
-
-  .experience__title {
-    /* The lowercase “w” has a wider first swash than the sibling's title. */
-    padding-left: clamp(18px, 1.6vw, 64px);
-    padding-right: clamp(18px, 1.6vw, 64px);
-    min-height: var(--experience-title-reserve);
-  }
-
-  .experience__title-reveal-clip {
-    /* Wide wordmarks have ascenders taller than the compact line box. */
-    top: 0.18em;
-  }
-
-  .experience__title-overline {
-    bottom: 0.55rem;
-  }
-}
-
-/* Ultra-wide canvases need a taller masthead reserve. The fitted wordmark keeps
-   spanning the viewport, while the nav and carousel sit below its main strokes;
-   the long “g” swash may still underlap them intentionally. */
-@media (min-width: 2400px) {
-  .experience__title-bleed {
-    --experience-title-reserve: clamp(24rem, 20vw, 44rem);
-  }
-}
-
-/* Preloader intro — blur/scale must not be clipped by ancestor overflow (Safari). */
-.experience--preloader-intro .experience__header,
-.experience--preloader-intro .experience__title,
-.experience--preloader-intro .experience__title-reveal-clip {
-  overflow: visible;
-}
-
-.experience__title--intro-surface .experience__title-reveal-track,
-.experience__title--intro-surface .experience__title-overline {
-  will-change: transform, opacity;
-}
-
-.experience__title-bleed--preloader-slot {
-  min-height: clamp(4rem, 18vw, 9rem);
 }
 
 .experience__nav-row-placeholder {
@@ -530,30 +458,55 @@ main.experience--preloader-reveal ~ .sticky-register__spots-hint {
   padding-block: 0.35rem;
 }
 
-@media (max-width: 899px) {
-  .experience__title-bleed {
-    --experience-title-reserve: clamp(6.4rem, 14.5svh, 8.2rem);
-    min-height: var(--experience-title-reserve);
+/*
+ * Wide screens: nav + meta share the descender band with the “g” (nav sits left of
+ * it, meta right), so the header ends exactly at the bottom of the ink and the
+ * carousel never covers any stroke. Width is capped by height so short desktop
+ * windows keep the carousel in view.
+ */
+@media (min-width: 900px) {
+  .experience__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .experience__header > * {
+    grid-area: 1 / 1;
   }
 
   .experience__title {
-    min-height: var(--experience-title-reserve);
-    /* The lowercase “w” has a deep left swash; keep real ink off the phone edge. */
-    padding-left: clamp(18px, 4.8vw, 24px);
-    padding-right: clamp(12px, 3.5vw, 18px);
+    --wordmark-max-width: 150svh;
+  }
+
+  .experience__nav-row,
+  .experience__nav-row-placeholder {
+    align-self: end;
+  }
+}
+
+@media (max-width: 899px) {
+  .experience__title {
+    padding-top: 0.35rem;
   }
 
   .experience__title-overline {
-    top: calc(100% + 0.2rem);
-    right: 0;
-    bottom: auto;
-    padding-inline: 0;
-    font-size: clamp(0.58rem, 2.15vw, 0.72rem);
+    font-size: clamp(0.56rem, 2.1vw, 0.72rem);
     letter-spacing: 0.015em;
   }
 
   .experience__nav-row {
-    margin-top: 1.45rem;
+    margin-top: 0.15rem;
+  }
+}
+
+/* Very narrow phones: the overline would reach the “g”, so it drops below the ink. */
+@media (max-width: 360px) {
+  .experience__title-overline {
+    top: calc(100% + 0.25rem);
+  }
+
+  .experience__nav-row {
+    margin-top: 1.1rem;
   }
 }
 
@@ -695,7 +648,7 @@ button.experience__meta--cta:focus-visible {
   border: none;
   background: transparent;
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  color: var(--color-accent);
+  color: var(--color-accent-ink);
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
@@ -1869,13 +1822,15 @@ button.experience__meta--cta:focus-visible {
   }
 }
 
-.booking-success {
+.booking-success,
+.booking-closed {
   display: grid;
   gap: 0.4rem;
   width: min(100%, 42rem);
 }
 
-.booking-success h3 {
+.booking-success h3,
+.booking-closed h3 {
   margin: 0;
   font-family: inherit;
   font-size: 0.75rem;
@@ -1884,7 +1839,8 @@ button.experience__meta--cta:focus-visible {
   letter-spacing: 0.01em;
 }
 
-.booking-success p {
+.booking-success p,
+.booking-closed p {
   margin: 0;
   color: var(--color-ink-soft);
   font-family: inherit;
@@ -1893,6 +1849,27 @@ button.experience__meta--cta:focus-visible {
   letter-spacing: 0.01em;
   line-height: 1.5;
   text-transform: none;
+}
+
+.booking-closed__link {
+  position: relative;
+  justify-self: start;
+  margin-top: 0.55rem;
+  color: var(--color-accent-ink);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/* TextReveal sets pre-line; keep short shrink-wrapped labels on one line so they
+   never measure themselves into a narrower box and split (“1250 / PLN”). */
+.apply-view__title-block h2.text-reveal,
+.booking-closed__link .text-reveal {
+  white-space: nowrap;
 }
 
 /* Footer details FAB: same collapsed/expanded behavior across desktop and mobile. */
@@ -2126,19 +2103,6 @@ button.experience__meta--cta:focus-visible {
     overflow: hidden;
   }
 
-  .experience__title {
-    line-height: 0.96;
-  }
-
-  .experience__title-overline {
-    top: calc(100% + 0.2rem);
-    right: 0;
-    bottom: auto;
-    padding-inline: 0;
-    font-size: clamp(0.58rem, 2.15vw, 0.72rem);
-    line-height: 1.1;
-  }
-
   .experience__nav-row {
     display: flex;
     align-items: center;
@@ -2345,7 +2309,8 @@ button.experience__meta--cta:focus-visible {
 
   .apply-view__intro,
   .apply-view__form,
-  .booking-success {
+  .booking-success,
+  .booking-closed {
     width: 100%;
   }
 
@@ -2362,7 +2327,9 @@ button.experience__meta--cta:focus-visible {
   .signup-form__button,
   .signup-form__meta,
   .booking-success h3,
-  .booking-success p {
+  .booking-success p,
+  .booking-closed h3,
+  .booking-closed p {
     font-size: 0.75rem;
   }
 

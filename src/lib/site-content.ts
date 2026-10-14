@@ -52,6 +52,10 @@ export type SiteContent = {
     };
     button: string;
     helperText: string;
+    closedTitle: string;
+    closedText: string;
+    nextPhotoDayLabel: string;
+    nextPhotoDayUrl: string;
   };
   topics: TopicContent[];
 };
@@ -100,10 +104,9 @@ export const siteContent: SiteContent = {
   signup: {
     title: "1250 PLN",
     titleSubline: "Photo Day | Picnic Experience",
-    spotsLeftText: "Количество мест ограничено",
+    spotsLeftText: "",
     intro: [
       "В стоимость входит подготовка образа со стилистом, makeup в стилистике WILD GRACE, персональная съемка, готовые 12-15 фотографий и совместное времяпрепровождение за пикником с другими участницами.",
-      "Оставьте заявку, и мы свяжемся с вами в Instagram, чтобы подтвердить место и обсудить детали образа.",
     ],
     fields: {
       nameLabel: "Имя",
@@ -116,6 +119,11 @@ export const siteContent: SiteContent = {
     button: "ЗАБРОНИРОВАТЬ МЕСТО",
     helperText:
       "После заявки мы свяжемся с вами в Instagram для подтверждения бронирования.",
+    closedTitle: "Регистрация на этот фотодень закрыта",
+    closedText:
+      "Этот фотодень уже состоялся. Новые фотодни и проекты — на lizakarasiova.com.",
+    nextPhotoDayLabel: "ПЕРЕЙТИ НА LIZAKARASIOVA.COM",
+    nextPhotoDayUrl: "https://lizakarasiova.com/",
   },
   topics: [
     {
