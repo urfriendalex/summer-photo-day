@@ -1868,6 +1868,7 @@ button.experience__meta--cta:focus-visible {
 /* TextReveal sets pre-line; keep short shrink-wrapped labels on one line so they
    never measure themselves into a narrower box and split (“1250 / PLN”). */
 .apply-view__title-block h2.text-reveal,
+.apply-view__title-block .apply-view__title-subline,
 .booking-closed__link .text-reveal {
   white-space: nowrap;
 }

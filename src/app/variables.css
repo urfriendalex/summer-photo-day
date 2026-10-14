@@ -1,15 +1,15 @@
 :root {
-  /* Cherry Butter — milky cream, cherry ink, butter and cherry-blossom accents
+  /* Cherry Butter — milky cream, muted cherry-cocoa ink, butter and blush accents
      pulled from the photo day itself (yellow tulle, garden roses, picnic linen). */
   --color-accent: #f4da8a;
   /* Lighter cherry for links and secondary labels; still ≥4.5:1 on the cream. */
-  --color-accent-ink: #b04a55;
+  --color-accent-ink: #a35a60;
   --color-bg: #fcf5e6;
   --color-surface: #fffaf0;
-  --color-ink: #8a2f3b;
-  --color-ink-soft: rgba(138, 47, 59, 0.82);
+  --color-ink: #7d3f44;
+  --color-ink-soft: rgba(125, 63, 68, 0.84);
   --color-pastel-yellow: #f7e4a6;
-  --color-peach: #f6d3d3;
+  --color-peach: #f5d8d2;
 
   --radius-base: 0;
 
@@ -29,7 +29,7 @@
     var(--color-pastel-yellow) 8%
   );
   /* Shared frosted chip — `.landing-info-panel` (+) and register CTA pill */
-  --landing-frost-chip-border: 1px solid rgba(138, 47, 59, 0.22);
+  --landing-frost-chip-border: 1px solid rgba(125, 63, 68, 0.22);
   --landing-frost-chip-height: 48px;
   --landing-info-panel-pad: 1.25rem;
   --landing-info-panel-toggle-reserve: 3.25rem;
