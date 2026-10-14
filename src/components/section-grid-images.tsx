@@ -92,7 +92,16 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     const syncColumnsToViewport = () => {
       const mobile = media.matches;
       setIsMobile(mobile);
-      setColumns(mobile ? 1 : 3);
+      let preferredColumns = mobile ? 1 : 3;
+      try {
+        const saved = Number(localStorage.getItem(`photo-grid-columns-${mobile ? "mobile" : "desktop"}`));
+        if ((mobile ? [1, 2] : [2, 3, 4]).includes(saved)) {
+          preferredColumns = saved;
+        }
+      } catch {
+        // Storage can be unavailable in private or restricted browsing.
+      }
+      setColumns(preferredColumns as GridColumnCount);
       if (mobile && pinnedRef.current) {
         switchTransitionRect.current = switchRef.current?.getBoundingClientRect() ?? null;
         pinnedRef.current = false;
@@ -407,7 +416,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (reduceMotion) {
+    if (reduceMotion || isMobile) {
       gsap.set(switchEl, {
         opacity: 1,
         clearProps: "transform,filter",
@@ -440,9 +449,14 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
     return () => {
       tween.kill();
     };
-  }, [imageListKey, images.length, firstLineIndex]);
+  }, [imageListKey, images.length, firstLineIndex, isMobile]);
 
   const changeColumns = (nextColumns: GridColumnCount) => {
+    try {
+      localStorage.setItem(`photo-grid-columns-${isMobile ? "mobile" : "desktop"}`, String(nextColumns));
+    } catch {
+      // Layout switching still works when storage is unavailable.
+    }
     if (nextColumns === columns || !gridRef.current) {
       setColumns(nextColumns);
       return;
@@ -481,9 +495,7 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
         }
       : undefined;
 
-  return (
-    <div className="topic-detail__grid-block">
-      <div className="topic-detail__grid-switch-slot" style={pinnedSlotStyle}>
+  const switcher = (
         <div
           ref={switchRef}
           className={`topic-detail__grid-switch${isPinned && !isMobile ? " topic-detail__grid-switch--pinned" : ""}`}
@@ -516,6 +528,12 @@ export function SectionGridImages({ images, firstLineIndex }: SectionGridImagesP
           ))
         )}
         </div>
+  );
+
+  return (
+    <div className="topic-detail__grid-block">
+      <div className="topic-detail__grid-switch-slot" style={pinnedSlotStyle}>
+        {isMobile ? createPortal(switcher, document.body) : switcher}
       </div>
 
       <div

@@ -25,6 +25,12 @@ export const DURATION_TRANSFORM_S = 0.465;
 export const LANDING_INFO_PANEL_TEXT_REVEAL_LAG_S = 0.135;
 
 /**
+ * Picnic overlay — delay line reveals until the panel scale-in is mostly complete
+ * (aligned with the prior eyebrow slot after the image block).
+ */
+export const PICNIC_FEATURE_TEXT_REVEAL_LAG_S = 0.47;
+
+/**
  * Topic grid image motion — scaled with `LINE_STAGGER_S` so `GRID_REVEAL_TAIL_LINE_SLOTS` stays aligned.
  */
 export const GRID_IMAGE_REVEAL_DURATION_S = 0.594;
